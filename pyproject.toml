@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "spendit"
+version = "1.0"
+description = "num app"
+authors = ["Bosco Ho <apposite@gmail.com>"]
+readme = "readme.md"
+packages = [{include = "server"}]
+
+[tool.poetry.scripts]
+spendit = 'server.cli:cli'
+
+[tool.poetry.dependencies]
+addict = "*"
+colorama = "*"
+dateparser = "*"
+duckdb = "*"
+fastapi = "*"
+pandas = "*"
+path = "*"
+psutil = "*"
+pydash = "*"
+python-multipart = "*"
+rich = "*"
+ruyaml = "*"
+structlog = "*"
+uvicorn = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+

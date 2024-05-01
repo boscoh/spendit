@@ -1,0 +1,39 @@
+- desc: Vehicle and Transport
+  filter: uber myki NEURONAU*
+  key: V
+- desc: Insurance, CPDB, prof reg, health
+  filter: chemmart cwh chemist  TIWARI JOSHI MEDIBANK
+  key: I
+- desc: Tech and subscriptions
+  filter: vultr dreamhost amazon JetBrains ASYLUM google apple dropbox crikey profstevekeen
+    Vodafone *FUTUREDHARM spotify
+  key: C
+- desc: Utilities and rates
+  filter: mate
+  key: U
+- desc: Flights (Travel)
+  filter: null
+  key: F
+- desc: Accommodation (Travel)
+  filter: null
+  key: A
+- desc: Day-time food and drinks
+  filter: coffee cafe caffeine *maker Timber+Greens brunetti frankie *PIDAPIPO spice
+    beans ali espresso *bean prosper   *penny
+  key: D
+- desc: Night-time food and drink
+  filter: 'gelat kenangan '
+  key: N
+- desc: Groceries
+  filter: iga woolworths murphy's MEATS aldi grocery SMP*Bakers market larder curds
+    organics SMP*Jagos coles supermarket epicurean seafood eggporium french
+  key: G
+- desc: Shopping
+  filter: officworks  dymocks readings jb muji uniqlo LIV*Outdoors.com.au
+  key: S
+- desc: Entertainment
+  filter: ''
+  key: E
+- desc: Other
+  filter: tax corp UNISUPER
+  key: X

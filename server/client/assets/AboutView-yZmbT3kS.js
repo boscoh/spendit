@@ -1,0 +1,1 @@
+import{_ as t,c as o,o as s,a as e}from"./index-o30KbOda.js";const c={},n={class:"p-3 pt-5"},_=e("h1",null,"About",-1),a=e("div",null,"This is an about page",-1),i=[_,a];function r(d,l){return s(),o("div",n,i)}const h=t(c,[["render",r]]);export{h as default};

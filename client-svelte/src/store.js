@@ -17,7 +17,7 @@ export async function loadTable(newTable) {
 	if ('result' in response) {
 		const result = response.result;
 		headers.set(result.columns);
-		rows.set(_.reverse(result.data));
+		rows.set(result.data);
 	}
 	response = await remote.get_categories();
 	if ('result' in response) {

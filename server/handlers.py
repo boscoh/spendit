@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+import json
 
 import pandas
 import psutil
@@ -48,7 +49,9 @@ def get_tables():
 
 
 def get_transactions(table):
-    return db.get_json(table)
+    df = db.get_df(table)
+    df.sort_values(by="date", inplace=True)
+    return json.loads(df.to_json(orient="split"))
 
 
 def update_transactions(table, row_id, vals):

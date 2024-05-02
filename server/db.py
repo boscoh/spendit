@@ -14,9 +14,7 @@ and generate pandas dataframes
 
 logger = logging.getLogger(__name__)
 
-this_dir = Path(__file__).abspath().parent
-data_dir = this_dir / "data"
-sample_dir = this_dir / "../sample"
+data_dir = Path(__file__).abspath().parent / "data"
 sqlite_fname = data_dir / "data.sqlite"
 duckdb_fname = data_dir / "data.duckdb"
 

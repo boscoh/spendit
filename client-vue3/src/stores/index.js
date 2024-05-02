@@ -25,7 +25,7 @@ export const index = defineStore('counter', () => {
     table.value = newTable
     let response = await remote.get_transactions(newTable)
     headers.value = response.result.columns
-    rows.value = _.reverse(response.result.data)
+    rows.value = response.result.data
     updateCount.value = updateCount.value + 1
   }
 

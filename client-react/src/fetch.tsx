@@ -21,7 +21,7 @@ async function fetchTable(table: string) {
     const response2 = await remote.get_transactions(table)
     if ('result' in response2) {
         transactions.headers = response2.result.columns
-        transactions.rows = _.reverse(response2.result.data)
+        transactions.rows = response2.result.data
     }
 
     store.dispatch(setTransactions(transactions))

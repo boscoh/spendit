@@ -28,7 +28,7 @@ def run(dev, port, csv):
     from app import run_server
 
     if csv:
-        csv = str(Path(csv).absolute())
+        csv = str(Path(csv).abspath())
     else:
         csv = None
     run_server(dict(dev=dev, port=port, csv=csv))

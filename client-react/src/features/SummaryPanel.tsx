@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux'
-import { IRootState } from '../store/store.ts'
+import { IRootState } from '../store'
 import { ICategory } from '../store/transactionsSlice.tsx'
 import { DateTime, Interval } from 'luxon'
 import _ from 'lodash'

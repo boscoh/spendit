@@ -111,6 +111,16 @@ class SqliteDb:
         self.commit()
         logger.info(f"update {id} {vals}")
 
+    def drop_table(self, table):
+        if table in self.get_tables():
+            self.execute(f'DROP TABLE {table}')
+            self.commit()
+
+    def rename_table(self, table, new_table):
+        if table in self.get_tables():
+            new_table = py_.snake_case(new_table)
+            self.execute(f"ALTER TABLE {table} RENAME to {new_table};")
+            self.commit()
 
 class DuckDb:
     def __init__(self, db_fname=duckdb_fname, table="transactions"):

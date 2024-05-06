@@ -1,38 +1,103 @@
 import {remote} from '../../../rpc/rpc.ts'
+import {ReactElement, useEffect, useState} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
-import {setCategory, ITransactions} from '../store/transactionsSlice.tsx'
+import {ITransactions, updateCategory} from '../store/transactionsSlice.tsx'
 import _ from 'lodash'
-import {ReactElement} from 'react'
 import {DateTime} from 'luxon'
-import {IRootState} from "../store/store.ts";
-
-// function getNext<T>(x: T, xVals: T[]) {
-//     const i = xVals.indexOf(x)
-//     const iNext = i < xVals.length - 1 ? i + 1 : 0
-//     return xVals[iNext]
-// }
+import store, {IRootState} from '../store'
 
 export function TransactionTable() {
-    const transactions:ITransactions = useSelector((state: IRootState) => state.transactions)
     const dispatch = useDispatch()
+    const [iRowActive, setIRowActive] = useState<number>(0)
+    const transactions = useSelector((state: IRootState) => state.transactions)
 
-    // Skip the first column as it contains the ID
-    // Assume the last row is the category
+    useEffect(() => {
+        if (transactions.clickTransaction) {
+            const time = transactions.clickTransaction.time
+            const category = transactions.clickTransaction.category
+            const rows = transactions.rows
 
-    const showHeaders = _.slice(transactions.headers, 1, transactions.headers.length)
-    const trHeader = showHeaders.map((k) => <th key={k}>{k}</th>)
+            for (let i = 0; i < rows.length; i += 1) {
+                const row = rows[i]
+                if (time === row[1] && category === _.last(row)) {
+                    const targetId = row[0]
+                    const div = document.getElementById(targetId)
+                    console.log('found click div', div)
+                    if (div) {
+                        div.scrollIntoView()
+                        setIRowActive(i)
+                    }
+                }
+            }
+        }
 
-    const descByCategory = _.mapValues(_.keyBy(transactions.categories, 'key'), 'desc')
+        document.addEventListener('keydown', onKeydown)
+        return () => {
+            document.removeEventListener('keydown', onKeydown)
+        }
+
+    }, [iRowActive, transactions.clickTransaction])
 
     async function changeCategory(id: string, category: string) {
-        console.log('changeCategory', id, category)
-        dispatch(setCategory({ id, category }))
-        await remote.update_transactions(transactions.table, id, { category })
+        await remote.update_transactions(transactions.table, id, {category})
+        dispatch(updateCategory({id, category}))
+    }
+
+    function getRow(transactions: ITransactions, iRowSelect: number) {
+        let iRow = 0
+        for (const row of transactions.rows) {
+            if (transactions.filterCategory) {
+                if (_.last(row) !== transactions.filterCategory) {
+                    continue
+                }
+            }
+            if (iRow === iRowSelect) {
+                return row
+            }
+            iRow += 1
+        }
+        return null
+    }
+
+    async function onKeydown(event: KeyboardEvent) {
+        const state = store.getState()
+        const transactions = state.transactions
+        if (transactions.keyLock) {
+            return
+        }
+        console.log('onKeydown', event.key, iRowActive)
+        if (event.key === 'ArrowDown') {
+            if (iRowActive === transactions.rows.length - 1) {
+                setIRowActive(0)
+            } else {
+                setIRowActive(iRowActive + 1)
+            }
+        } else if (event.key === 'ArrowUp') {
+            if (iRowActive == 0) {
+                setIRowActive(transactions.rows.length - 1)
+            } else {
+                setIRowActive(iRowActive - 1)
+            }
+        } else {
+            const category = event.key.toUpperCase()
+            const row = getRow(transactions, iRowActive)
+            if (row) {
+                if (
+                    _.find(transactions.categories, (c) => c.key === category)
+                ) {
+                    const id = row[0]
+                    await remote.update_transactions(transactions.table, id, {
+                        category,
+                    })
+                    dispatch(updateCategory({category, id}))
+                }
+            }
+        }
     }
 
     const trRows = []
     const iLast = transactions.headers.length - 1
-    for (const row of transactions.rows) {
+    for (const [iRow, row] of transactions.rows.entries()) {
         if (transactions.filterCategory) {
             if (_.last(row) !== transactions.filterCategory) {
                 continue
@@ -40,20 +105,13 @@ export function TransactionTable() {
         }
         // format each column specifially
         const tdList: ReactElement[] = []
+        let rowStyle = {}
+        if (iRow === iRowActive) {
+            rowStyle = {backgroundColor: '#ffe'}
+        }
         row.forEach((v, i) => {
-            if (i === 0) {
-                // skip the id
-                return
-            }
-            if (i === 1) {
-                v = DateTime.fromISO(v).toFormat('ddLLLyy')
-            }
             let td
             if (i === iLast) {
-                if (v in descByCategory) {
-                    v += ' - ' + descByCategory[v]
-                }
-
                 const options = [
                     <option value="" key="">
                         -- select an option --
@@ -76,26 +134,43 @@ export function TransactionTable() {
                     </select>
                 )
                 td = (
-                    <td className={'user-select-none'} key={i}>
+                    <td style={rowStyle} key={i}>
                         {select}
                     </td>
                 )
             } else {
+                if (i === 1) {
+                    v = DateTime.fromISO(v).toFormat('ddLLLyy')
+                }
                 td = (
-                    <td className={'user-select-none'} key={i}>
+                    <td style={rowStyle} key={i}>
                         {v}
                     </td>
                 )
             }
             tdList.push(td)
         })
-        trRows.push(<tr key={row[0]}>{tdList}</tr>)
+        trRows.push(
+            <tr
+                id={row[0]}
+                onClick={() => {
+                    setIRowActive(iRow)
+                }}
+                key={row[0]}
+            >
+                {tdList}
+            </tr>
+        )
     }
 
     return (
         <table className="table">
             <thead>
-                <tr>{trHeader}</tr>
+            <tr>
+                {transactions.headers.map((k) => (
+                    <th key={k}>{k}</th>
+                ))}
+            </tr>
             </thead>
             <tbody>{trRows}</tbody>
         </table>

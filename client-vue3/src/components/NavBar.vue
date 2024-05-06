@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-      <span class="navbar-brand">Spend It Vue3!</span>
+      <span class="navbar-brand">Spendit[vue3]</span>
       <button
         class="navbar-toggler"
         type="button"

@@ -1,17 +1,17 @@
 <script setup>
 import { remote } from '../../../rpc/rpc.js'
-import { index } from '../stores/index.js'
+import { transactionsStore } from '../stores/transactionsStore.js'
 import { onMounted, ref } from 'vue'
 import _ from 'lodash'
 
-const store = index()
+const store = transactionsStore()
 const categories = ref([])
 
 async function autofill() {
   console.log('submit autofill', _.cloneDeep(categories.value))
   await remote.set_categories(categories.value)
   await remote.autofill(store.table)
-  store.loadTable(store.table)
+  store.loadTransactions(store.table)
 }
 
 onMounted(async () => {

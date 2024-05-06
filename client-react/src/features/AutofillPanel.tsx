@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
-import { IRootState } from '../store/store.ts'
+import { IRootState } from '../store'
 import { setFilterOfCategory, setKeyLock } from '../store/transactionsSlice.tsx'
 import _ from 'lodash'
 import { autofill } from '../fetch.tsx'

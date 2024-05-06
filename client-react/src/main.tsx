@@ -5,7 +5,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min'
 import './index.css'
 
 import { Provider } from 'react-redux'
-import store from './store/store.ts'
+import store from './store'
 
 import { RouterProvider } from 'react-router-dom'
 import { router } from './pages/router.tsx'

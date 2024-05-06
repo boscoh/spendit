@@ -7,7 +7,7 @@ console.log(`rpc.remoteUrl=${remoteUrl}`)
 
 declare global {
     interface Window {
-        URL: any,
+        URL: any
     }
 }
 
@@ -18,17 +18,17 @@ declare global {
 }
 
 interface IResponseResult {
-    result: any,
-    jsonrpc?: string,
+    result: any
+    jsonrpc?: string
     id?: string
 }
 
 interface IResponseError {
     error: {
-        code: number,
+        code: number
         message: string
     }
-    jsonrpc?: string,
+    jsonrpc?: string
     id?: string
 }
 
@@ -66,8 +66,11 @@ function clone(o: any) {
  *        }
  *      }
  */
-async function aysncRpc(method: string, ...params: any[]): Promise<IResponseType> {
-    const startTime = (new Date()).getTime()
+async function aysncRpc(
+    method: string,
+    ...params: any[]
+): Promise<IResponseType> {
+    const startTime = new Date().getTime()
 
     const id = Math.random().toString(36).slice(-6)
 
@@ -84,19 +87,19 @@ async function aysncRpc(method: string, ...params: any[]): Promise<IResponseType
 
     let response
     try {
-        const payload = {method, params, jsonrpc: '2.0', id}
+        const payload = { method, params, jsonrpc: '2.0', id }
         const fetchResponse = await fetch(remoteUrl, {
             method: 'post',
             mode: 'cors',
             cache: 'no-cache',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         })
 
         response = await fetchResponse.json()
 
-        const elapsed = (new Date()).getTime() - startTime
-        if ("result" in response) {
+        const elapsed = new Date().getTime() - startTime
+        if ('result' in response) {
             console.log(`rpc.${method}.result[${elapsed}ms]: ↓`)
             console.groupCollapsed()
             console.log(clone(response.result))
@@ -111,10 +114,10 @@ async function aysncRpc(method: string, ...params: any[]): Promise<IResponseType
             }
         }
     } catch (e) {
-        const elapsed = (new Date()).getTime() - startTime
+        const elapsed = new Date().getTime() - startTime
         console.log(`rpc.${method}.fail[${elapsed}ms]: ${e}`)
         response = {
-            error: {message: `${e}`, code: -32000},
+            error: { message: `${e}`, code: -32000 },
             jsonrpc: '2.0',
             id,
         }
@@ -122,6 +125,28 @@ async function aysncRpc(method: string, ...params: any[]): Promise<IResponseType
     return response
 }
 
+async function remoteUpload(file: File, method: string, ...params: any[]) {
+    const formData = new FormData()
+    formData.append('file', file, file.name)
+    formData.append('method', method)
+    formData.append('paramsJson', JSON.stringify(params))
+    let payload = { body: formData, method: 'post' }
+    console.log('payload', payload)
+    let startTime = new Date().getTime()
+    console.log(`rpc.start.upload`, payload)
+    let response = await fetch(remoteUrl.replace('rpc-run', 'upload/'), payload)
+    let elapsed: number = new Date().getTime() - startTime
+
+    const jsonResponse = await response.json()
+    if ('result' in jsonResponse) {
+        console.log(`rpc.result.upload[${elapsed}ms]: ↓`)
+        console.groupCollapsed()
+        console.log(jsonResponse.result)
+        console.groupEnd()
+    }
+
+    return jsonResponse
+}
 
 type rpcFn = (...rest: any[]) => Promise<IResponseType>
 
@@ -141,12 +166,10 @@ interface IRemoteRpc {
     [key: string]: rpcFn
 }
 
-
 const remote = new RemoteRpcProxy() as IRemoteRpc
 
-
 function saveBlobFile(blob: Blob, filename: string) {
-    const nav = (window.navigator as any)
+    const nav = window.navigator as any
     if (nav.msSaveOrOpenBlob) {
         nav.msSaveOrOpenBlob(blob, filename)
     } else {
@@ -178,12 +201,4 @@ function saveTextFile(text: string, filename: string) {
     document.body.removeChild(element)
 }
 
-
-
-export {
-    remote,
-    remoteUrl,
-    aysncRpc,
-    saveBlobFile,
-    saveTextFile,
-}
+export { remote, remoteUrl, remoteUpload, aysncRpc, saveBlobFile, saveTextFile }

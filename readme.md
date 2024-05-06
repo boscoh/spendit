@@ -45,8 +45,6 @@ cd client-react && npm i && npm run dev
 ```
 
 ### todo
-- sort dates before uploading
-- upload/delete/rename dataset
 - merge datasets
 - offsetDays/categories save in db per table
 - change main name for python import

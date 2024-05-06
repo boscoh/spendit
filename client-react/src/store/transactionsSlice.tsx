@@ -14,6 +14,7 @@ interface ITransactions {
     categories: ICategory[]
     filterCategory: string
     keyLock: boolean
+    clickTransaction: { [id: string] : string; }
 }
 
 const transactionsSlice = createSlice({
@@ -25,6 +26,7 @@ const transactionsSlice = createSlice({
         categories: [],
         filterCategory: '',
         keyLock: false,
+        clickTransaction: {}
     } as ITransactions,
     reducers: {
         setTransactions: (
@@ -36,19 +38,14 @@ const transactionsSlice = createSlice({
             state.headers = action.payload.headers
             state.rows = action.payload.rows
         },
-        setCategory: (
+        updateCategory: (
             state: ITransactions,
             action: PayloadAction<{ id: string; category: string }>
         ) => {
-            const payload = action.payload
-            const iCol = state.headers.indexOf('category')
-            for (const row of state.rows) {
-                if (row[0] !== payload.id) {
-                    continue
-                }
-                if (payload.category !== undefined) {
-                    row[iCol] = payload.category
-                }
+            const row = _.find(state.rows, r => r[0] === action.payload.id)
+            if (row) {
+                const iCol = state.headers.indexOf('category')
+                row[iCol] = action.payload.category
             }
         },
         setFilterCategory: (
@@ -72,6 +69,9 @@ const transactionsSlice = createSlice({
         setKeyLock: (state: ITransactions, action: PayloadAction<boolean>) => {
             state.keyLock = action.payload
         },
+        setClickTransaction: (state: ITransactions, action: PayloadAction<{ time: string; category: string }>) => {
+            state.clickTransaction = action.payload
+        },
     },
 })
 
@@ -79,9 +79,10 @@ const transactionsSlice = createSlice({
 export const {
     setTransactions,
     setFilterOfCategory,
-    setCategory,
+    updateCategory,
     setFilterCategory,
     setKeyLock,
+    setClickTransaction
 } = transactionsSlice.actions
 
 export type { ICategory, ITransactions }

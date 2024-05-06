@@ -26,6 +26,13 @@ ttab "source .venv/bin/activate; cd server; python cli.py run --dev"
 cd rpc
 cp config.dev.json config.json
 cd ..
+
+if [ ! -d "client-$1/node_modules" ]; then
+  cd "client-$1"
+  echo "installing client dependencies"
+  npm install .
+  cd ..
+fi
 ttab "cd client-$1; npm run dev;"
 
 

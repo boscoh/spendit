@@ -10,13 +10,14 @@ import webbrowser
 from contextlib import closing
 from io import BytesIO
 from urllib.request import urlopen
+import json
 
 import colorama
 import psutil
 import structlog
 import uvicorn
 from addict import Dict
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 from path import Path
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -71,7 +72,7 @@ def make_app(config):
                 result = await fn(*params)
             else:
                 result = fn(*params)
-            result = {"result": result, "jsonrpc": "2.0", "id": job_id}
+            payload = {"result": result, "jsonrpc": "2.0", "id": job_id}
             elapsed_ms = round((time.perf_counter_ns() - start_time) / 1e6)
             time_str = get_time_str(elapsed_ms / 1000)
             logger.info("rpc_run_finish", method=method, time=time_str)
@@ -85,12 +86,12 @@ def make_app(config):
             )
             for line in error_lines:
                 print(line)
-            result = {
+            payload = {
                 "error": {"code": -1, "message": error_lines},
                 "jsonrpc": "2.0",
                 "id": job_id,
             }
-        return result
+        return payload
 
     @app.get("/download/{file_id}")
     async def stream_file_for_download(file_id: str):
@@ -106,19 +107,43 @@ def make_app(config):
             raise e
 
     @app.post("/upload/")
-    async def save_uploaded_file(file: UploadFile = File(...)):
+    async def receive_uploaded_file(
+        file: UploadFile = File(...),
+        method: str = Form(...),
+        paramsJson: str = Form(...),
+    ):
         try:
             fname = file.filename.replace(" ", "-")
             full_fname = data_dir / fname
+
+            stem = full_fname.stem
+            ext = full_fname.ext
             i = 1
             while full_fname.exists():
-                full_fname = data_dir / f"{fname}({i})"
+                full_fname = full_fname.parent / f"{stem}({i}){ext}"
                 i += 1
+
             data_dir.makedirs_p()
             with open(full_fname, "wb+") as f:
                 f.write(file.file.read())
             logger.info("save", filename=full_fname)
-            return {"filename": full_fname.name}
+
+            if not hasattr(handlers, method):
+                raise Exception(f"rpc-run {method} is not found")
+
+            start_time = time.perf_counter_ns()
+            params = [full_fname] + json.loads(paramsJson)
+            logger.info("upload_handler_start", method=method, params=params)
+            fn = getattr(handlers, method)
+            if inspect.iscoroutinefunction(fn):
+                result = await fn(*params)
+            else:
+                result = fn(*params)
+            elapsed_ms = round((time.perf_counter_ns() - start_time) / 1e6)
+            time_str = get_time_str(elapsed_ms / 1000)
+            logger.info("upload_handler_finish", method=method, time=time_str)
+
+            return {"result": result, "jsonrpc": "2.0", "id": None}
         except Exception as e:
             error_lines = str(traceback.format_exc()).splitlines()
             logger.error("upload_error", lines=error_lines)

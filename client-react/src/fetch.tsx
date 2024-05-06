@@ -1,9 +1,9 @@
 import { remote } from '../../rpc/rpc.ts'
 import _ from 'lodash'
 import { ITransactions, setTransactions } from './store/transactionsSlice.tsx'
-import store from './store/store.ts'
+import store from './store'
 
-async function fetchTable(table: string) {
+async function fetchTransactions(table: string) {
     const transactions = {
         table,
         keyLock: false,
@@ -31,7 +31,7 @@ async function autofill() {
     const state = store.getState()
     await remote.set_categories(state.transactions.categories)
     await remote.autofill(state.transactions.table)
-    await fetchTable(state.transactions.table)
+    await fetchTransactions(state.transactions.table)
 }
 
 
@@ -43,4 +43,4 @@ async function getTables() {
     return []
 }
 
-export { fetchTable, autofill, getTables }
+export { fetchTransactions, autofill, getTables }

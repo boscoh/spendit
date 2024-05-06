@@ -91,6 +91,30 @@ async function runRemoteMethod(method, ...params) {
     return response
 }
 
+async function remoteUpload(file, method, ...params) {
+    const formData = new FormData()
+    formData.append('file', file, file.name)
+    formData.append('method', method)
+    formData.append('paramsJson', JSON.stringify(params))
+    let payload = {body: formData, method: 'post'}
+    console.log('payload', payload)
+    let startTime = new Date()
+    console.log(`rpc.start.upload`, payload)
+    let response = await fetch(remoteUrl.replace('rpc-run', 'upload/'), payload)
+    let elapsed = new Date() - startTime
+
+    const jsonResponse = await response.json()
+    if ('result' in jsonResponse) {
+        console.log(`rpc.result.upload[${elapsed}ms]: ↓`)
+        console.groupCollapsed()
+        console.log(jsonResponse.result)
+        console.groupEnd()
+    }
+
+    return jsonResponse
+}
+
+
 class RemoteRpcProxy {
     constructor() {
         return new Proxy(this, {
@@ -135,4 +159,4 @@ function saveTextFile(text, filename) {
 
 const remote = new RemoteRpcProxy()
 
-export {remote, remoteUrl, runRemoteMethod, saveBlobFile, saveTextFile}
+export {remote, remoteUrl, remoteUpload, runRemoteMethod, saveBlobFile, saveTextFile}

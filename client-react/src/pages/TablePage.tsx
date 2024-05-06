@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { IRootState } from '../store/store.ts'
+import { IRootState } from '../store'
 import { setFilterCategory } from '../store/transactionsSlice.tsx'
 
 import { remote, saveTextFile } from '../../../rpc/rpc.ts'
@@ -12,16 +12,19 @@ import { TransactionTable } from '../features/TransactionTable.tsx'
 import { CategoryPlot } from '../features/CategoryPlot.tsx'
 import { SummaryPanel } from '../features/SummaryPanel.tsx'
 import { AutofillPanel } from '../features/AutofillPanel.tsx'
-import { fetchTable } from '../fetch.tsx'
+import { RenameModal } from '../features/RenameModal.tsx'
+
+import { fetchTransactions } from '../fetch.tsx'
 
 function TablePage() {
     const dispatch = useDispatch()
     const transactions = useSelector((state: IRootState) => state.transactions)
     const params = useParams()
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (params.table && params.table !== transactions.table) {
-            fetchTable(params.table)
+            fetchTransactions(params.table)
         }
     }, [params.table])
 
@@ -60,6 +63,11 @@ function TablePage() {
         }
     }
 
+    async function deleteTable() {
+        await remote.delete_table(transactions.table)
+        navigate('/')
+    }
+
     return (
         <div className="d-flex flex-column">
             <NavBar></NavBar>
@@ -74,16 +82,28 @@ function TablePage() {
                     <CategoryPlot />
                 </div>
 
-                <div className="d-flex flex-row gap-2 mb-2">
-                    <AutofillPanel />
-                    <SummaryPanel />
-                    <div
-                        className="btn btn-outline-primary"
-                        onClick={downloadCsv}
-                    >
-                        CSV
+                <div className="d-flex flex-row justify-content-between">
+                    <div className="d-flex flex-row gap-2 mb-2">
+                        <AutofillPanel />
+                        <SummaryPanel />
+                        <RenameModal />
+                        <div
+                            className="btn btn-outline-primary"
+                            onClick={downloadCsv}
+                        >
+                            CSV
+                        </div>
+                        <div>{selectFilter}</div>
                     </div>
-                    <div>{selectFilter}</div>
+
+                    <div>
+                        <button
+                            className="btn btn-outline-primary"
+                            onClick={deleteTable}
+                        >
+                            Delete
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex-grow-1 card overflow-auto mb-3">

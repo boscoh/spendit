@@ -1,11 +1,11 @@
 <script setup>
 import {remote} from '../../../rpc/rpc.js'
-import {index} from '../stores/index.js'
+import {transactionsStore} from '../stores/transactionsStore.js'
 import {ref, watch} from 'vue'
 import {DateTime, Interval} from 'luxon'
 import _ from 'lodash'
 
-const store = index()
+const store = transactionsStore()
 
 const summaries = ref([])
 const nDay = ref(null)
@@ -14,7 +14,6 @@ const nMonth = ref(null)
 const offsetDay = ref(0)
 
 async function update() {
-  console.log('data changed')
   let response = await remote.get_categories()
   const categorySets = response.result
 

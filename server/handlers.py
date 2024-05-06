@@ -25,20 +25,6 @@ def init(config):
         inject_csv(config["csv"])
 
 
-def inject_csv(csv, table=None):
-    df = pandas.read_csv(csv)
-    if "category" not in df:
-        df["category"] = ""
-    if "id" not in df.columns:
-        columns = list(df.columns)
-        df["id"] = df.index
-        df = df[["id"] + columns]
-    rename_df_to_snake(df)
-    if table is None:
-        table = py_.snake_case(Path(csv).stem)
-    db.replace_table_with_df(df, table)
-
-
 def kill():
     db.close()
     psutil.Process(os.getpid()).kill()
@@ -59,8 +45,8 @@ def update_transactions(table, row_id, vals):
     return {"success": True}
 
 
-def get_csv():
-    return db.get_csv()
+def get_csv(table):
+    return db.get_csv(table)
 
 
 def set_categories(categories):
@@ -92,3 +78,34 @@ def autofill(table):
             db.update(row.id, {"category": None}, table)
         elif category and category != row.category:
             db.update(row.id, {"category": category}, table)
+
+
+def inject_csv(csv, table=None):
+    df = pandas.read_csv(csv)
+    if "category" not in df:
+        df["category"] = ""
+    if "id" not in df.columns:
+        columns = list(df.columns)
+        df["id"] = df.index
+        df = df[["id"] + columns]
+    rename_df_to_snake(df)
+    if table is None:
+        table = py_.snake_case(Path(csv).stem)
+    db.replace_table_with_df(df, table)
+    logger.info('inject_csv', table=table)
+
+
+def upload_csv(fname):
+    logger.info('upload_csv', fname=fname)
+    fname = Path(fname)
+    inject_csv(fname, table=py_.snake_case(fname.stem))
+    fname.remove_p()
+    return {"filename": fname}
+
+
+def delete_table(table):
+    db.drop_table(table)
+
+def rename_table(table, new_table):
+    print(table, '->', new_table)
+    db.rename_table(table, new_table)

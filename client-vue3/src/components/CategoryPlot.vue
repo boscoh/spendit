@@ -1,21 +1,17 @@
 <script setup>
-import { index } from '../stores/index.js'
+import { transactionsStore } from '../stores/transactionsStore.js'
 import { VuePlotly } from 'vue3-plotly'
 import { ref, watch } from 'vue'
-import { remote } from '../../../rpc/rpc.js'
+import _ from 'lodash'
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-const store = index()
-
+const store = transactionsStore()
 const vuePlotlyEl = ref(null)
 const plotData = ref([])
 
-const config = {}
-
-// remove space for title
 const layout = {
   margin: {
     l: 50,
@@ -25,42 +21,32 @@ const layout = {
     pad: 4
   },
   height: 320,
-  title: '',
-  hovermode: 'closest',
-  clickmode: 'event'
+  title: ''
 }
 
-const descByCategory = {}
-const categories = []
-
 watch(
-  () => store.updateCount,
+  () => [store.updateCount, store.categories, store.filterCategory],
   async () => {
-    console.log('CategoryPlot: store.data changed')
 
-    if (!categories.length) {
-      let response = await remote.get_categories()
-      const categorySets = response.result
-      for (let categorySet of categorySets) {
-        descByCategory[categorySet.key] = categorySet.desc
-        categories.push(categorySet.key)
-      }
+    let categories = store.categories
+    if (store.filterCategory) {
+      categories = _.filter(categories, (c) => c.key === store.filterCategory)
     }
 
     let newPlotData = []
     for (let category of categories) {
-      if (category === 'X') {
+      if (category.key === 'X') {
         continue
       }
       let dataset = {
         x: [],
         y: [],
         type: 'scatter',
-        name: category + ' - ' + descByCategory[category]
+        name: category.key + ' - ' + category.desc
       }
       let cumul = 0
       for (let row of store.rows) {
-        if (row[4] === category) {
+        if (row[4] === category.key) {
           dataset.x.push(row[1])
           cumul += row[3]
           dataset.y.push(cumul)
@@ -68,13 +54,15 @@ watch(
       }
       newPlotData.push(dataset)
     }
+
     plotData.value = newPlotData
 
-    const plotlyId = vuePlotlyEl.value.plotlyId
-    const plotlyDiv = document.getElementById(plotlyId)
-    sleep(100)
-    plotlyDiv.on('plotly_click', (data) => {
-      console.log(data)
+    // wait for plotly to ingest data
+    await sleep(100)
+    const dev = document.getElementById(vuePlotlyEl.value.plotlyId)
+    dev.on('plotly_click', (data) => {
+      const point = data.points[0]
+      store.clickTransaction = { time: point.x, category: point.data.name.split(' ')[0] }
     })
   }
 )
@@ -83,5 +71,5 @@ watch(
 <style scoped></style>
 
 <template>
-  <VuePlotly ref="vuePlotlyEl" :data="plotData" :layout="layout" :config="config"></VuePlotly>
+  <VuePlotly ref="vuePlotlyEl" :data="plotData" :layout="layout"></VuePlotly>
 </template>

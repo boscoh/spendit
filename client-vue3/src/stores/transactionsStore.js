@@ -3,7 +3,8 @@ import { defineStore } from 'pinia'
 import { remote } from '../../../rpc/rpc.js'
 import _ from 'lodash'
 
-export const index = defineStore('counter', () => {
+export const transactionsStore = defineStore('transactions', () => {
+
   const table = ref('')
   const headers = ref([])
   const rows = ref([])
@@ -11,13 +12,14 @@ export const index = defineStore('counter', () => {
   const keyLock = ref(false)
   const filterCategory = ref(null)
   const categories = ref([])
+  const clickTransaction = ref(null)
 
   async function loadCategories() {
     let response = await remote.get_categories()
     categories.value = response.result
   }
 
-  async function loadTable(newTable) {
+  async function loadTransactions(newTable) {
     console.log(
       'loaded table',
       _.map(rows.value, (r) => r[1])
@@ -51,10 +53,11 @@ export const index = defineStore('counter', () => {
     rows,
     filterCategory,
     table,
+    clickTransaction,
     keyLock,
     categories,
     updateCount,
-    loadTable,
+    loadTransactions,
     loadCategories,
     updateRow,
     getTables

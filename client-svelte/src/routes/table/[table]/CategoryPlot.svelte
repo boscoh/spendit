@@ -1,14 +1,24 @@
 <script>
-    import {categories, rows} from "../../../store.js"
+    import {categories, clickTransaction, filterCategory, rows} from "../../../store.js"
     import _ from 'lodash'
     import Plot from 'svelte-plotly.js';
 
-    $: data = buildData($rows, $categories)
+    $: data = buildData($rows, $categories, $filterCategory)
 
-    function buildData(rows, categories) {
-        const descByCategory = _.mapValues(_.keyBy(categories, 'key'), 'desc')
+
+    function onPlotlyClick(e) {
+        const point = e.detail.points[0]
+        const payload = {time: point.x, category: point.data.name.split(' ')[0]}
+        clickTransaction.set(payload)
+    }
+
+
+    function buildData(rows, categories, filterCategory) {
+        if (filterCategory) {
+            categories = _.filter(categories, (c) => c.key === filterCategory)
+        }
+
         let newPlotData = []
-        console.log('categories', categories)
         for (let category of categories) {
             if (category.key === 'X') {
                 continue
@@ -17,7 +27,7 @@
                 x: [],
                 y: [],
                 type: 'scatter',
-                name: category.key + ' - ' + descByCategory[category.key]
+                name: category.key + ' - ' + category.desc
             }
             let cumul = 0
             for (let row of rows) {
@@ -29,6 +39,8 @@
             }
             newPlotData.push(dataset)
         }
+
+
         return newPlotData
     }
 
@@ -50,6 +62,7 @@
 
 <Plot
         {data}
+        on:click={onPlotlyClick}
         layout={layout}
         fillParent="width"
 />

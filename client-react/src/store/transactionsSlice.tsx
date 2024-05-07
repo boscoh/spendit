@@ -29,14 +29,31 @@ const transactionsSlice = createSlice({
         clickTransaction: {}
     } as ITransactions,
     reducers: {
-        setTransactions: (
+        set: (
             state: ITransactions,
-            action: PayloadAction<ITransactions>
+            action: PayloadAction<Partial<ITransactions>>
         ) => {
-            state.table = action.payload.table
-            state.categories = action.payload.categories
-            state.headers = action.payload.headers
-            state.rows = action.payload.rows
+            if (action.payload.table) {
+                state.table = action.payload.table
+            }
+            if (action.payload.categories) {
+                state.categories = action.payload.categories
+            }
+            if (action.payload.headers) {
+                state.headers = action.payload.headers
+            }
+            if (action.payload.rows) {
+                state.rows = action.payload.rows
+            }
+            if (action.payload.keyLock) {
+                state.keyLock = action.payload.keyLock
+            }
+            if (action.payload.clickTransaction) {
+                state.clickTransaction = action.payload.clickTransaction
+            }
+            if (action.payload.filterCategory) {
+                state.filterCategory = action.payload.filterCategory
+            }
         },
         updateCategory: (
             state: ITransactions,
@@ -48,13 +65,7 @@ const transactionsSlice = createSlice({
                 row[iCol] = action.payload.category
             }
         },
-        setFilterCategory: (
-            state: ITransactions,
-            action: PayloadAction<string>
-        ) => {
-            state.filterCategory = action.payload
-        },
-        setFilterOfCategory: (
+        updateFilterOfCategory: (
             state: ITransactions,
             action: PayloadAction<{ categoryKey: string; filter: string }>
         ) => {
@@ -66,23 +77,14 @@ const transactionsSlice = createSlice({
                 category.filter = action.payload.filter
             }
         },
-        setKeyLock: (state: ITransactions, action: PayloadAction<boolean>) => {
-            state.keyLock = action.payload
-        },
-        setClickTransaction: (state: ITransactions, action: PayloadAction<{ time: string; category: string }>) => {
-            state.clickTransaction = action.payload
-        },
     },
 })
 
 // Action creators are generated for each case reducer function
 export const {
-    setTransactions,
-    setFilterOfCategory,
+    set,
+    updateFilterOfCategory,
     updateCategory,
-    setFilterCategory,
-    setKeyLock,
-    setClickTransaction
 } = transactionsSlice.actions
 
 export type { ICategory, ITransactions }

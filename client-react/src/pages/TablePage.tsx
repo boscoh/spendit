@@ -1,20 +1,18 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { useDispatch, useSelector } from 'react-redux'
+
 import { IRootState } from '../store'
-import { setFilterCategory } from '../store/transactionsSlice.tsx'
-
+import { set } from '../store/transactionsSlice.tsx'
 import { remote, saveTextFile } from '../../../rpc/rpc.ts'
-
-import { NavBar } from '../features/NavBar.tsx'
-import { TransactionTable } from '../features/TransactionTable.tsx'
-import { CategoryPlot } from '../features/CategoryPlot.tsx'
-import { SummaryPanel } from '../features/SummaryPanel.tsx'
-import { AutofillPanel } from '../features/AutofillPanel.tsx'
-import { RenameModal } from '../features/RenameModal.tsx'
-
 import { fetchTransactions } from '../fetch.tsx'
+
+import NavBar from '../features/NavBar.tsx'
+import TransactionTable from '../features/TransactionTable.tsx'
+import CategoryPlot from '../features/CategoryPlot.tsx'
+import SummaryPanel from '../features/SummaryPanel.tsx'
+import AutofillPanel from '../features/AutofillPanel.tsx'
+import RenameModal from '../features/RenameModal.tsx'
 
 function TablePage() {
     const dispatch = useDispatch()
@@ -23,13 +21,14 @@ function TablePage() {
     const navigate = useNavigate()
 
     useEffect(() => {
+        console.log('TablePage useeffect', params.table, transactions.table)
         if (params.table && params.table !== transactions.table) {
             fetchTransactions(params.table)
         }
-    }, [params.table])
+    }, [])
 
     function setCategoryFilter(filter: string) {
-        dispatch(setFilterCategory(filter))
+        dispatch(set({ filterCategory: filter }))
     }
 
     const options = [

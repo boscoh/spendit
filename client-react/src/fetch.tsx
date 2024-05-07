@@ -1,30 +1,20 @@
 import { remote } from '../../rpc/rpc.ts'
 import _ from 'lodash'
-import { ITransactions, setTransactions } from './store/transactionsSlice.tsx'
+import { ITransactions, set } from './store/transactionsSlice.tsx'
 import store from './store'
 
 async function fetchTransactions(table: string) {
-    const transactions = {
-        table,
-        keyLock: false,
-        categories: [],
-        headers: [],
-        rows: [],
-        filterCategory: '',
-    } as ITransactions
-
-    const response = await remote.get_categories()
-    if ('result' in response) {
-        transactions.categories = response.result
+    const transactions = {table} as Partial<ITransactions>
+    const categoriesResponse = await remote.get_categories()
+    if ('result' in categoriesResponse) {
+        transactions.categories = categoriesResponse.result
     }
-
-    const response2 = await remote.get_transactions(table)
-    if ('result' in response2) {
-        transactions.headers = response2.result.columns
-        transactions.rows = response2.result.data
+    const transactionsResponse = await remote.get_transactions(table)
+    if ('result' in transactionsResponse) {
+        transactions.headers = transactionsResponse.result.columns
+        transactions.rows = transactionsResponse.result.data
     }
-
-    store.dispatch(setTransactions(transactions))
+    store.dispatch(set(transactions))
 }
 
 async function autofill() {

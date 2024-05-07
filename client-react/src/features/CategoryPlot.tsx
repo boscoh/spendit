@@ -5,13 +5,13 @@ import Plot from 'react-plotly.js'
 import Plotly from 'plotly.js'
 import { IRootState } from '../store'
 import {useDispatch} from "react-redux";
-import { ITransactions, setClickTransaction } from '../store/transactionsSlice.tsx' // function getNext<T>(x: T, xVals: T[]) {
+import { ITransactions, set, setClickTransaction } from '../store/transactionsSlice.tsx' // function getNext<T>(x: T, xVals: T[]) {
 
 function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export function CategoryPlot() {
+export default function CategoryPlot() {
     const dispatch = useDispatch()
     const transactions: ITransactions = useSelector(
         (state: IRootState) => state.transactions
@@ -81,7 +81,7 @@ export function CategoryPlot() {
                     const point = data.points[0]
                     const payload = {time: point.x, category: point.data.name.split(' ')[0]}
                     console.log('click', payload)
-                    dispatch(setClickTransaction(payload))
+                    dispatch(set({clickTransaction: payload}))
                 })
             }
         }

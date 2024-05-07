@@ -6,10 +6,12 @@
 
 <div class="app">
     <Header/>
-    <slot/>
+    <div class="p-3">
+        <slot/>
+    </div>
 </div>
 
 <svelte:head>
-<!-- Loading here as importing directly causes some typing issues -->
-<script src="/bootstrap.bundle.min.js"></script>
+    <!-- Loading here as importing directly causes some typing issues -->
+    <script src="/bootstrap.bundle.min.js"></script>
 </svelte:head>

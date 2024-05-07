@@ -11,6 +11,7 @@ export const updateCount = writable(0);
 export const keyLock = writable(false);
 export const filterCategory = writable(null);
 
+export const clickTransaction = writable({})
 export async function loadTable(newTable) {
 	table.set(newTable);
 	let response = await remote.get_transactions(newTable);

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { remote } from '../../../rpc/rpc.ts'
 import { Offcanvas } from 'bootstrap'
 
-export function RenameModal() {
+export default function RenameModal() {
     const dispatch = useDispatch()
     const inputElement = useRef<HTMLInputElement>(null)
     const transactions = useSelector((state: IRootState) => state.transactions)
@@ -21,28 +21,22 @@ export function RenameModal() {
                 if (inputElement.current) {
                     inputElement.current.value = table.current
                 }
-                dispatch(setKeyLock(true))
+                dispatch(set({keyLock: true}))
             })
             myOffcanvas.addEventListener('hidden.bs.offcanvas', () => {
-                dispatch(setKeyLock(false))
+                dispatch(set({keyLock: false}))
             })
         }
     }, [])
 
     async function renameTable() {
-        if (inputElement.current) {
-            console.log(
-                'rename',
-                table.current,
-                '->',
-                inputElement.current.value
-            )
-            await remote.rename_table(table.current, inputElement.current.value)
-            const myOffcanvas = document.getElementById('renameModal')
-            if (myOffcanvas) {
-                Offcanvas.getInstance(myOffcanvas)?.hide()
-            }
-            navigate(`/table/${inputElement.current.value}`)
+        const myOffcanvas = document.getElementById('renameModal')
+        if (myOffcanvas && inputElement.current) {
+            const newTable = inputElement.current.value
+            console.log('rename', table.current, '->', newTable)
+            await remote.rename_table(table.current, newTable)
+            Offcanvas.getInstance(myOffcanvas)?.hide()
+            navigate(`/table/${newTable}`)
         }
     }
 
@@ -85,7 +79,6 @@ export function RenameModal() {
                         id="recipient-name"
                     />
                     <button
-                        type="button"
                         className="btn btn-primary"
                         onClick={renameTable}
                     >

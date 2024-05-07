@@ -4,7 +4,7 @@ import { ICategory } from '../store/transactionsSlice.tsx'
 import { DateTime, Interval } from 'luxon'
 import _ from 'lodash'
 
-export function SummaryPanel() {
+export default function SummaryPanel() {
     interface IInterval {
         nDay: number
         nWeek: number

@@ -1,23 +1,23 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { IRootState } from '../store'
-import { setFilterOfCategory, setKeyLock } from '../store/transactionsSlice.tsx'
-import _ from 'lodash'
+import { set, updateFilterOfCategory } from '../store/transactionsSlice.tsx'
 import { autofill } from '../fetch.tsx'
+import _ from 'lodash'
 
-export function AutofillPanel() {
+export default function AutofillPanel() {
     const transactions = useSelector((state: IRootState) => state.transactions)
     const dispatch = useDispatch()
 
     function lockKey() {
-        dispatch(setKeyLock(true))
+        dispatch(set({ keyLock: true }))
     }
 
     function unlockKey() {
-        dispatch(setKeyLock(false))
+        dispatch(set({ keyLock: false }))
     }
 
     function changeFilter(categoryKey: string, filter: string) {
-        dispatch(setFilterOfCategory({ categoryKey, filter }))
+        dispatch(updateFilterOfCategory({ categoryKey, filter }))
     }
 
     const categories = _.map(transactions.categories, (category) => (

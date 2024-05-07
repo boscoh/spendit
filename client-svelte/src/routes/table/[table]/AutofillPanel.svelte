@@ -1,5 +1,5 @@
 <script>
-    import {autofillTable, categories, keyLock, table} from "../../../store.js"
+    import {autofillTable, categories, keyLock, table} from '../../../store.js';
 </script>
 
 <div class="d-inline">
@@ -23,15 +23,15 @@
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="autofillPanel">Autofill panel</h5>
         <div class="px-2"></div>
-        <button class="btn btn-outline-primary" on:click={e => {autofillTable($table, $categories)}}>
+        <button
+                class="btn btn-outline-primary"
+                on:click={(e) => {
+				autofillTable($table, $categories);
+			}}
+        >
             Recalculate
         </button>
-        <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
         {#each $categories as category}
@@ -42,8 +42,12 @@
                             bind:value={category.filter}
                             class="ms-2 form-control"
                             id="category + 'Form'"
-                            on:blur={e => { $keyLock = true} }
-                            on:focus={e => { $keyLock = false} }
+                            on:blur={(e) => {
+							$keyLock = true;
+						}}
+                            on:focus={(e) => {
+							$keyLock = false;
+						}}
                             rows="3"
                     ></textarea>
                 </div>

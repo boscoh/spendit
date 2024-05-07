@@ -1,4 +1,4 @@
-import {NavBar} from '../features/NavBar.tsx'
+import NavBar from '../features/NavBar.tsx'
 
 function AboutPage() {
     return (

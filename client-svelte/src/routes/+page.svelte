@@ -1,6 +1,20 @@
 <script>
     import {onMount} from "svelte"
-    import {tables, getTables} from "../store.js"
+    import {getTables, tables} from "../store.js"
+    import {remoteUpload} from "../../../rpc/rpc.js";
+
+    let files = [];
+
+    async function submit(e) {
+        console.log('submit', files)
+        const file = files[0]
+        await remoteUpload(file, 'upload_csv')
+        await getTables()
+        const inputElement = document.querySelector(".form-control")
+        if (inputElement) {
+            inputElement.value = ""
+        }
+    }
 
     onMount(getTables)
 </script>
@@ -21,4 +35,15 @@
         </a>
     {/each}
 </ul>
+
+<div class="py-3">
+    <form ref="uploadForm" class="form-group">
+        <label for="uploadInput"l>Upload CSV</label>
+        <div class="d-flex flex-row gap-2">
+            <input class="form-control" style="width: 20em" type="file" id="uploadInput" bind:files/>
+            <button class="btn btn-outline-secondary" on:click={submit}>Upload</button>
+        </div>
+    </form>
+</div>
+
 

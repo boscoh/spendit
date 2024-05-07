@@ -1,7 +1,7 @@
-import { NavBar } from '../features/NavBar.tsx'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { getTables } from '../fetch.tsx'
 import { remoteUpload } from '../../../rpc/rpc.js'
+import NavBar from '../features/NavBar.tsx'
 
 function HomePage() {
     const [tables, setTables] = useState([])

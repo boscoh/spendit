@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 
-export function NavBar() {
+export default function NavBar() {
     const navigate = useNavigate()
 
     function goHome() {

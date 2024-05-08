@@ -35,5 +35,5 @@
   filter: ''
   key: E
 - desc: Other
-  filter: "tax corp \nUNISUPER"
+  filter: tax corp UNISUPER
   key: X

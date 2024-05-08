@@ -1,17 +1,11 @@
 <script setup>
 import { transactionsStore } from '../stores/transactionsStore.js'
-import { VuePlotly } from 'vue3-plotly'
+import VuePlotly from './VuePlotly.vue'
 import { ref, watch } from 'vue'
 import _ from 'lodash'
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
 const store = transactionsStore()
-const vuePlotlyEl = ref(null)
-const plotData = ref([])
-
+const data = ref([])
 const layout = {
   margin: {
     l: 50,
@@ -24,10 +18,14 @@ const layout = {
   title: ''
 }
 
+function onPlotlyClick(data) {
+  const point = data.points[0]
+  store.clickTransaction = { time: point.x, category: point.data.name.split(' ')[0] }
+}
+
 watch(
   () => [store.updateCount, store.categories, store.filterCategory],
   async () => {
-
     let categories = store.categories
     if (store.filterCategory) {
       categories = _.filter(categories, (c) => c.key === store.filterCategory)
@@ -55,15 +53,7 @@ watch(
       newPlotData.push(dataset)
     }
 
-    plotData.value = newPlotData
-
-    // wait for plotly to ingest data
-    await sleep(100)
-    const dev = document.getElementById(vuePlotlyEl.value.plotlyId)
-    dev.on('plotly_click', (data) => {
-      const point = data.points[0]
-      store.clickTransaction = { time: point.x, category: point.data.name.split(' ')[0] }
-    })
+    data.value = newPlotData
   }
 )
 </script>
@@ -71,5 +61,5 @@ watch(
 <style scoped></style>
 
 <template>
-  <VuePlotly ref="vuePlotlyEl" :data="plotData" :layout="layout"></VuePlotly>
+  <VuePlotly @plotly_click="onPlotlyClick" :data="data" :layout="layout"></VuePlotly>
 </template>

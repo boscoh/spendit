@@ -1,10 +1,8 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { remote } from '../../../rpc/rpc.js'
-import _ from 'lodash'
 
 export const transactionsStore = defineStore('transactions', () => {
-
   const table = ref('')
   const headers = ref([])
   const rows = ref([])
@@ -20,10 +18,6 @@ export const transactionsStore = defineStore('transactions', () => {
   }
 
   async function loadTransactions(newTable) {
-    console.log(
-      'loaded table',
-      _.map(rows.value, (r) => r[1])
-    )
     table.value = newTable
     let response = await remote.get_transactions(newTable)
     headers.value = response.result.columns
@@ -48,6 +42,22 @@ export const transactionsStore = defineStore('transactions', () => {
     updateCount.value = updateCount.value + 1
   }
 
+  async function updateCategory(id, category) {
+    for (let storeRow of rows.value) {
+      if (storeRow[0] === id) {
+        storeRow[storeRow.length - 1] = category
+      }
+    }
+    await remote.update_transactions(table.value, id, { category })
+    updateCount.value = updateCount.value + 1
+  }
+
+  async function autofill() {
+    await remote.set_categories(categories.value)
+    await remote.autofill(table.value)
+    loadTransactions(table.value)
+  }
+
   return {
     headers,
     rows,
@@ -60,6 +70,8 @@ export const transactionsStore = defineStore('transactions', () => {
     loadTransactions,
     loadCategories,
     updateRow,
-    getTables
+    getTables,
+    updateCategory,
+    autofill
   }
 })

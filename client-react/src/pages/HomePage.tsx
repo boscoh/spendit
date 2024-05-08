@@ -11,7 +11,6 @@ function HomePage() {
         setTables(await getTables())
     }
 
-    useEffect(() => { reset() }, [])
     function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
         if (e.target.files) {
             setFile(e.target.files[0])
@@ -24,6 +23,10 @@ function HomePage() {
             reset()
         }
     }
+
+    useEffect(() => {
+        reset()
+    }, [])
 
     return (
         <div className="d-flex flex-column">

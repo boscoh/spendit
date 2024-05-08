@@ -42,12 +42,12 @@
                             bind:value={category.filter}
                             class="ms-2 form-control"
                             id="category + 'Form'"
-                            on:blur={(e) => {
-							$keyLock = true;
-						}}
-                            on:focus={(e) => {
-							$keyLock = false;
-						}}
+                            on:blur={() => {
+                                $keyLock = true;
+                            }}
+                            on:focus={() => {
+                                $keyLock = false;
+                            }}
                             rows="3"
                     ></textarea>
                 </div>

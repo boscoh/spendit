@@ -1,15 +1,15 @@
 <script>
 	import {remote} from '../../../../../rpc/rpc.js';
 	import {onMount} from 'svelte';
-	import {categories, clickTransaction, filterCategory, headers, keyLock, rows, table} from '../../../store.js';
+	import {categories, clickTransaction,updateCategory, filterCategory, headers, keyLock, rows, table} from '../../../store.js';
 	import _ from 'lodash';
 
 	let iRowActive = 0;
     $: filteredRows = displayRows($rows, $filterCategory);
-    $: dummy = newClick(filteredRows, $clickTransaction);
+    $: dummy = handleClick(filteredRows, $clickTransaction);
 
 
-    function newClick(rows, transaction) {
+    function handleClick(rows, transaction) {
         if (!transaction) {
             return;
         }
@@ -19,6 +19,7 @@
                 console.log('goto', row[0], transaction);
                 document.getElementById(row[0]).scrollIntoView();
                 iRowActive = i;
+                clickTransaction.set({})
                 return;
             }
         }
@@ -41,20 +42,6 @@
         return rows;
     }
 
-    /**
-     * @param  {number} iRow
-     * @param  {string} category
-     */
-    async function setCategory(iRow, category) {
-        let filteredRow = filteredRows[iRow];
-        let id = filteredRow[0];
-        let row = _.find($rows, (r) => r[0] === id);
-        let iLast = row.length - 1;
-        row[iLast] = category;
-        $rows = $rows;
-        await remote.update_transactions($table, id, {category});
-    }
-
     async function onKeydown(event) {
         if ($keyLock) {
             return;
@@ -73,7 +60,8 @@
         } else {
             let category = event.key.toUpperCase();
             if (_.find($categories, (c) => c.key === category)) {
-                await setCategory(iRowActive, category);
+                const row = filteredRows[iRowActive]
+                await updateCategory(row[0], category);
             }
         }
     }
@@ -86,6 +74,10 @@
         document.addEventListener('keydown', onKeydown);
     });
 </script>
+
+<style>
+    table thead th { position: sticky; top: 0; z-index: 2000; background-color: white}
+</style>
 
 <table class="table">
     <thead>
@@ -105,7 +97,7 @@
                                 class="form-select"
                                 bind:value={row[iCol]}
                                 aria-label="Default select example"
-                                on:change={(e) => setCategory(iRow, e.target.value)}
+                                on:change={(e) => updateCategory(row[0], e.target.value)}
                         >
                             <option disabled selected value> -- select an option --</option>
                             {#each $categories as c}

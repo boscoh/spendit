@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { ChangeEvent, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -12,7 +12,7 @@ import TransactionTable from '../features/TransactionTable.tsx'
 import CategoryPlot from '../features/CategoryPlot.tsx'
 import SummaryPanel from '../features/SummaryPanel.tsx'
 import AutofillPanel from '../features/AutofillPanel.tsx'
-import RenameModal from '../features/RenameModal.tsx'
+import EditBox from '../features/EditBox.tsx'
 
 function TablePage() {
     const dispatch = useDispatch()
@@ -20,40 +20,23 @@ function TablePage() {
     const params = useParams()
     const navigate = useNavigate()
 
+    const options = [
+        { key: '', desc: '-- all --' },
+        ...transactions.categories.map((c) => ({
+            key: c.key,
+            desc: `only ${c.key}`,
+        })),
+    ]
+
     useEffect(() => {
-        console.log('TablePage useeffect', params.table, transactions.table)
         if (params.table && params.table !== transactions.table) {
             fetchTransactions(params.table)
         }
     }, [])
 
-    function setCategoryFilter(filter: string) {
-        dispatch(set({ filterCategory: filter }))
+    function setFilter(e: ChangeEvent<HTMLSelectElement>) {
+        dispatch(set({ filterCategory: e.target.value }))
     }
-
-    const options = [
-        <option value={''} key={''}>
-            -- all --
-        </option>,
-    ]
-    for (const category of transactions.categories) {
-        options.push(
-            <option value={category.key} key={category.key}>
-                only {category.key}
-            </option>
-        )
-    }
-
-    const selectFilter = (
-        <select
-            className="form-select"
-            aria-label="Default select example"
-            value={transactions.filterCategory}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-        >
-            {options}
-        </select>
-    )
 
     async function downloadCsv() {
         const response = await remote.get_csv(transactions.table)
@@ -67,6 +50,12 @@ function TablePage() {
         navigate('/')
     }
 
+    async function renameTable(newTable: string) {
+        dispatch(set({ table: newTable }))
+        await remote.rename_table(transactions.table, newTable)
+        navigate(`/table/${newTable}`)
+    }
+
     return (
         <div className="d-flex flex-column">
             <NavBar></NavBar>
@@ -75,40 +64,51 @@ function TablePage() {
                 style={{ height: 'calc(100vh - 56px)' }}
                 className="pt-3 flex-grow-1 container-fluid d-flex flex-column"
             >
-                <h1>Table: {transactions.table}</h1>
+                <div className="d-flex flex-row justify-content-between align-items-center">
+                    <EditBox
+                        text={transactions.table}
+                        handleText={renameTable}
+                    ></EditBox>
+                    <button
+                        className="btn btn-outline-primary"
+                        onClick={deleteTable}
+                    >
+                        Delete
+                    </button>
+                </div>
 
                 <div style={{ width: '100%', height: '300px' }}>
                     <CategoryPlot />
                 </div>
 
-                <div className="d-flex flex-row justify-content-between">
-                    <div className="d-flex flex-row gap-2 mb-2">
-                        <AutofillPanel />
-                        <SummaryPanel />
-                        <RenameModal />
-                        <div
-                            className="btn btn-outline-primary"
-                            onClick={downloadCsv}
-                        >
-                            CSV
-                        </div>
-                        <div>{selectFilter}</div>
+                <div className="d-flex flex-row gap-2 my-2">
+                    <AutofillPanel />
+                    <SummaryPanel />
+                    <div
+                        className="btn btn-outline-primary"
+                        onClick={downloadCsv}
+                    >
+                        CSV
                     </div>
-
                     <div>
-                        <button
-                            className="btn btn-outline-primary"
-                            onClick={deleteTable}
-                        >
-                            Delete
-                        </button>
+                        {
+                            <select
+                                className="form-select"
+                                value={transactions.filterCategory}
+                                onChange={setFilter}
+                            >
+                                {options.map(({ key, desc }) => (
+                                    <option value={key} key={key}>
+                                        {desc}
+                                    </option>
+                                ))}
+                            </select>
+                        }
                     </div>
                 </div>
 
                 <div className="flex-grow-1 card overflow-auto mb-3">
-                    <div className="p-2">
-                        <TransactionTable></TransactionTable>
-                    </div>
+                    <TransactionTable />
                 </div>
             </div>
         </div>

@@ -1,13 +1,11 @@
 import config from './config.json'
 
 const remoteUrl = config.apiUrl
-console.log(`config=${JSON.stringify(config)}`)
-console.log(`rpc.remoteUrl=${remoteUrl}`)
+console.log(`remoteUrl=${remoteUrl}`)
 
 function clone(o) {
     return JSON.parse(JSON.stringify(o))
 }
-
 
 
 /**
@@ -43,7 +41,7 @@ async function runRemoteMethod(method, ...params) {
 
     const id = Math.random().toString(36).slice(-6)
 
-    let s = `rpc.${method}.start(`
+    let s = `remote.${method}.start(`
     let n = params.length
     for (let i = 0; i < n; i += 1) {
         s += JSON.stringify(clone(params[i]))
@@ -69,27 +67,39 @@ async function runRemoteMethod(method, ...params) {
 
         let elapsed = new Date() - startTime
         if ("result" in response) {
-            console.log(`rpc.${method}.result[${elapsed}ms]: ↓`)
+            console.log(`remote.${method}.result[${elapsed}ms]: ↓`)
             console.groupCollapsed()
             console.log(clone(response.result))
             console.groupEnd()
         } else {
-            console.log(`rpc.${method}.error[${elapsed}ms]:`, clone(response.error))
+            console.log(`remote.${method}.error[${elapsed}ms]:`, clone(response.error))
             for (let line of response.error.message) {
                 console.log(`!! ${line}`)
             }
         }
     } catch (e) {
         let elapsed = new Date() - startTime
-        console.log(`rpc.${method}.fail[${elapsed}ms]: ${e}`)
+        console.log(`remote.${method}.fail[${elapsed}ms]: ${e}`)
         response = {
-            error: {message: `${e}`, code: -32000},
-            jsonrpc: '2.0',
-            id
+            error: {message: `${e}`, code: -32000}, jsonrpc: '2.0', id
         }
     }
     return response
 }
+
+
+class RemoteRpcProxy {
+    constructor() {
+        return new Proxy(this, {
+            get(target, prop) {
+                return async function (...rest) {
+                    return await runRemoteMethod(prop, ...rest)
+                }
+            }
+        })
+    }
+}
+
 
 async function remoteUpload(file, method, ...params) {
     const formData = new FormData()
@@ -112,19 +122,6 @@ async function remoteUpload(file, method, ...params) {
     }
 
     return jsonResponse
-}
-
-
-class RemoteRpcProxy {
-    constructor() {
-        return new Proxy(this, {
-            get(target, prop) {
-                return async function (...rest) {
-                    return await runRemoteMethod(prop, ...rest)
-                }
-            }
-        })
-    }
 }
 
 
@@ -159,4 +156,4 @@ function saveTextFile(text, filename) {
 
 const remote = new RemoteRpcProxy()
 
-export {remote, remoteUrl, remoteUpload, runRemoteMethod, saveBlobFile, saveTextFile}
+export {remote, remoteUrl, remoteUpload, saveBlobFile, saveTextFile}

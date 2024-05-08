@@ -15,7 +15,7 @@ export default function NavBar() {
         <>
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
                 <div className="container-fluid">
-                    <span className="navbar-brand">SpendIt React!</span>
+                    <span className="navbar-brand">SpendIt[react]</span>
                     <button
                         className="navbar-toggler"
                         type="button"
@@ -53,4 +53,3 @@ export default function NavBar() {
         </>
     )
 }
-

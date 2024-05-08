@@ -1,10 +1,9 @@
 import { remote } from '../../rpc/rpc.ts'
-import _ from 'lodash'
 import { ITransactions, set } from './store/transactionsSlice.tsx'
 import store from './store'
 
 async function fetchTransactions(table: string) {
-    const transactions = {table} as Partial<ITransactions>
+    const transactions = { table } as Partial<ITransactions>
     const categoriesResponse = await remote.get_categories()
     if ('result' in categoriesResponse) {
         transactions.categories = categoriesResponse.result
@@ -23,7 +22,6 @@ async function autofill() {
     await remote.autofill(state.transactions.table)
     await fetchTransactions(state.transactions.table)
 }
-
 
 async function getTables() {
     const response = await remote.get_tables()

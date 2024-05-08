@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
-import HomePage from './HomePage.tsx'
-import TablePage from './TablePage.tsx'
-import AboutPage from './AboutPage.tsx'
+import HomePage from './pages/HomePage.tsx'
+import TablePage from './pages/TablePage.tsx'
+import AboutPage from './pages/AboutPage.tsx'
 
 export const router = createBrowserRouter([
     {

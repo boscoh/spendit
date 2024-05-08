@@ -1,50 +1,21 @@
 <script>
     import {page} from '$app/stores'
+    import {goto} from '$app/navigation';
     import {onMount} from "svelte";
-    import {categories, filterCategory, keyLock, loadTable, table} from "../../../store.js";
+    import {categories, filterCategory, loadTable, table} from "../../../store.js";
+    import {remote} from "../../../../../rpc/rpc.js";
+
     import DataTable from './DataTable.svelte';
     import CategoryPlot from './CategoryPlot.svelte';
     import AutofillPanel from "./AutofillPanel.svelte";
     import SummaryPanel from "./SummaryPanel.svelte";
-    import {remote} from "../../../../../rpc/rpc.js";
-    import {goto} from '$app/navigation';
+    import EditBox from "./EditBox.svelte";
 
-    let inputRef
-    let isEdit = false
-    let newTable = ""
-
-    function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-    async function startRename() {
-        newTable = $table
-        isEdit = true
-        await sleep(200)
-        inputRef.focus()
-        document.addEventListener('keydown', keydown)
-        keyLock.set(true)
-    }
-
-    function cleanupRename() {
-        isEdit = false
-        keyLock.set(false)
-        document.removeEventListener('keydown', keydown)
-    }
-
-    function keydown(e) {
-        if (e.key === 'Escape') {
-            cleanupRename()
-        }
-    }
-
-    async function renameTable() {
+    async function renameTable(newTable) {
         await remote.rename_table($table, newTable)
-        console.log($table, '->', newTable)
-        keyLock.set(false)
+        console.log('renameTable', $table, '->', newTable)
         await goto(`/table/${newTable}`)
         await loadTable(newTable)
-        cleanupRename()
     }
 
     async function deleteTable() {
@@ -63,49 +34,9 @@
 
 <div class="d-flex flex-column p-3" style="height: calc(100vh - 70px)">
     <div class="d-flex flex-row justify-content-between align-items-center">
-        <div class="d-flex flex-row align-items-center py-2 gap-2">
-            {#if isEdit}
-                <input
-                        type="text"
-                        id="input-rename"
-                        style="font-size: 2em; font-weight: 500"
-                        bind:this={inputRef}
-                        bind:value={newTable}
-                        class="form-control"
-                />
-                <button
-                        class="btn btn-outline-primary"
-                        on:click={renameTable}
-                >
-                    Rename
-                </button>
-                <button
-                        class="btn btn-outline-primary"
-                        on:click={cleanupRename}
-                >
-                    X
-                </button>
-            {:else}
-                <div
-                        style="font-size: 2em; font-weight: 500;"
-                        class="form-control"
-                >
-                    {$table}
-                </div>
-                <button
-                        class="btn btn-outline-primary"
-                        on:click={startRename}
-                >
-                    Edit
-                </button>
-            {/if}
-        </div>
-
-        <div>
-            <button class="btn btn-outline-primary" on:click={deleteTable}>Delete</button>
-        </div>
+        <EditBox text={$table} handleText={renameTable}></EditBox>
+        <button class="btn btn-outline-primary" on:click={deleteTable}>Delete</button>
     </div>
-
 
     <div style="width: 100%;">
         <CategoryPlot></CategoryPlot>

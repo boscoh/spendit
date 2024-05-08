@@ -1,5 +1,4 @@
 <script setup>
-import {remote} from '../../../rpc/rpc.js'
 import {transactionsStore} from '../stores/transactionsStore.js'
 import {ref, watch} from 'vue'
 import {DateTime, Interval} from 'luxon'
@@ -13,53 +12,59 @@ const nWeek = ref(null)
 const nMonth = ref(null)
 const offsetDay = ref(0)
 
-async function update() {
-  let response = await remote.get_categories()
-  const categorySets = response.result
-
-  // DateTime.fromFormat(v, 'dd/MM/yyyy').toFormat('LLLdd-yy')
-  let times = _.map(store.rows, (r) => DateTime.fromISO(r[1]))
-  times.sort((a, b) => b - a)
-  let interval = Interval.fromDateTimes(_.last(times), _.head(times))
-  nDay.value = interval.length('days') - offsetDay.value
-  nWeek.value = (nDay.value / 7).toFixed(2)
-  nMonth.value = (nDay.value / 30).toFixed(2)
-
-  summaries.value = []
-  for (let c of categorySets) {
-    let dataset = {
-      sum: 0,
-      key: c.key,
-      desc: c.key + ': ' + c.desc
+watch(
+  () => [store.updateCount, offsetDay.value, store.categories],
+  () => {
+    if (!store.categories) {
+      return
     }
+
+    // DateTime.fromFormat(v, 'dd/MM/yyyy').toFormat('LLLdd-yy')
+    let times = _.filter(_.map(store.rows, (r) => r[1]))
+    if (!times.length) {
+      return
+    }
+
+    times = _.map(times, DateTime.fromISO)
+    times.sort((a, b) => b - a)
+    let interval = Interval.fromDateTimes(_.last(times), _.head(times))
+    nDay.value = interval.length('days') - offsetDay.value
+    nWeek.value = (nDay.value / 7).toFixed(2)
+    nMonth.value = (nDay.value / 30).toFixed(2)
+
+    summaries.value = []
+    for (let c of store.categories) {
+      let dataset = {
+        sum: 0,
+        key: c.key,
+        desc: c.key + ': ' + c.desc
+      }
+      for (let row of store.rows) {
+        if (row[4] === c.key) {
+          dataset.sum = dataset.sum + row[3]
+        }
+      }
+      summaries.value.push(dataset)
+    }
+
+    let extra = 0
     for (let row of store.rows) {
-      if (row[4] === c.key) {
-        dataset.sum = dataset.sum + row[3]
+      if (!row[4]) {
+        extra += row[3]
       }
     }
-    summaries.value.push(dataset)
-  }
+    let i = summaries.value.length - 1
+    summaries.value[i].sum += extra
 
-  let extra = 0
-  for (let row of store.rows) {
-    if (!row[4]) {
-      extra += row[3]
+    for (let dataset of summaries.value) {
+      dataset.sumDay = (dataset.sum / nDay.value).toFixed(0)
+      dataset.sumWeek = (dataset.sum / nWeek.value).toFixed(0)
+      dataset.sumMonth = (dataset.sum / nMonth.value).toFixed(0)
+      dataset.sum = dataset.sum.toFixed(0)
+      dataset.sumYear = dataset.sumMonth * 12
     }
   }
-  let i = summaries.value.length - 1
-  summaries.value[i].sum += extra
-
-  for (let dataset of summaries.value) {
-    dataset.sumDay = (dataset.sum / nDay.value).toFixed(0)
-    dataset.sumWeek = (dataset.sum / nWeek.value).toFixed(0)
-    dataset.sumMonth = (dataset.sum / nMonth.value).toFixed(0)
-    dataset.sum = dataset.sum.toFixed(0)
-    dataset.sumYear = dataset.sumMonth * 12
-  }
-}
-
-watch(() => store.updateCount, update)
-watch(() => offsetDay.value, update)
+)
 </script>
 
 <template>

@@ -12,7 +12,6 @@ export default function SummaryPanel() {
     }
 
     const transactions = useSelector((state: IRootState) => state.transactions)
-    // const descByCategory = _.mapValues(_.keyBy(data.categories, 'key'), 'desc')
     let offsetDay = 0
     const interval = getInterval(transactions.rows, offsetDay)
     const summaries = getSummaries(

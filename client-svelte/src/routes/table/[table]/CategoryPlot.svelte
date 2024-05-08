@@ -17,7 +17,6 @@
         if (filterCategory) {
             categories = _.filter(categories, (c) => c.key === filterCategory)
         }
-
         let newPlotData = []
         for (let category of categories) {
             if (category.key === 'X') {
@@ -39,8 +38,6 @@
             }
             newPlotData.push(dataset)
         }
-
-
         return newPlotData
     }
 
@@ -62,8 +59,8 @@
 
 <Plot
         {data}
-        on:click={onPlotlyClick}
-        layout={layout}
         fillParent="width"
+        layout={layout}
+        on:click={onPlotlyClick}
 />
 

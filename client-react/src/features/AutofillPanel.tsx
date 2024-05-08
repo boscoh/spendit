@@ -20,25 +20,6 @@ export default function AutofillPanel() {
         dispatch(updateFilterOfCategory({ categoryKey, filter }))
     }
 
-    const categories = _.map(transactions.categories, (category) => (
-        <div key={category.key}>
-            <div className="d-flex flex-row mb-3">
-                <label className="mt-2" htmlFor={category + 'Form'}>
-                    {category.key}
-                </label>
-                <textarea
-                    value={category.filter ? category.filter : ''}
-                    onChange={(e) => changeFilter(category.key, e.target.value)}
-                    className="ms-2 form-control"
-                    id="category + 'Form'"
-                    onBlur={unlockKey}
-                    onFocus={lockKey}
-                    rows={3}
-                ></textarea>
-            </div>
-        </div>
-    ))
-
     return (
         <div>
             <div className="d-inline">
@@ -77,7 +58,36 @@ export default function AutofillPanel() {
                         aria-label="Close"
                     ></button>
                 </div>
-                <div className="offcanvas-body">{categories}</div>
+                <div className="offcanvas-body">
+                    {_.map(transactions.categories, (category) => (
+                        <div key={category.key}>
+                            <div className="d-flex flex-row mb-3">
+                                <label
+                                    className="mt-2"
+                                    htmlFor={category + 'Form'}
+                                >
+                                    {category.key}
+                                </label>
+                                <textarea
+                                    value={
+                                        category.filter ? category.filter : ''
+                                    }
+                                    onChange={(e) =>
+                                        changeFilter(
+                                            category.key,
+                                            e.target.value
+                                        )
+                                    }
+                                    className="ms-2 form-control"
+                                    id="category + 'Form'"
+                                    onBlur={unlockKey}
+                                    onFocus={lockKey}
+                                    rows={3}
+                                ></textarea>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )

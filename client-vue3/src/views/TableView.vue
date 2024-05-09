@@ -23,13 +23,13 @@ async function downloadCsv() {
 
 async function deleteTable() {
   await remote.delete_table(store.table)
-  router.push('/')
+  await router.push('/')
 }
 
 async function renameTable(newTable) {
   await remote.rename_table(store.table, newTable)
   store.table = newTable
-  router.replace(`/table/${newTable}`)
+  await router.replace(`/table/${newTable}`)
 }
 
 onMounted(() => {

@@ -29,7 +29,8 @@ export default {
 
   data() {
     return {
-      plotlyId: `plotly-${uuidv4()}`
+      plotlyId: `plotly-${uuidv4()}`,
+      plot: null
     }
   },
 
@@ -50,7 +51,7 @@ export default {
   emits: events,
 
   mounted() {
-    Plotly.newPlot(this.plotlyId, this.data, this.layout, this.config)
+    this.plot = Plotly.newPlot(this.plotlyId, this.data, this.layout, this.config)
 
     events.forEach((name) => {
       this.$refs.container.on(name, (...args) => this.$emit(name, ...args))
@@ -58,9 +59,12 @@ export default {
 
     this.resizeObserver = new ResizeObserver(() => {
       clearTimeout(timeOutFunctionId) // debounce the reset
-      timeOutFunctionId = setTimeout(this.reactPlot, 100)
+      timeOutFunctionId = setTimeout(() => {
+        Plotly.Plots.resize(this.$refs.container)
+      }, 100)
     })
-    this.resizeObserver.observe(document.getElementById(this.plotlyId))
+
+    this.resizeObserver.observe(this.$refs.container)
   },
 
   beforeUnmount() {

@@ -80,8 +80,6 @@ th,
 td {
   text-align: left;
 }
-
-/*table thead th { position: sticky; top: 0; z-index: 1; }*/
 .active {
   background-color: #ffe;
 }
@@ -98,7 +96,7 @@ td {
       <tr v-for="(row, iRow) of filteredRows" :key="row[0]" :id="row[0]" @click="iRowActive = iRow">
         <td
           v-for="(val, i) of formatRow(row)"
-          v-bind:class="iRow === iRowActive ? 'active align-middle' : 'align-middle'"
+          :class="iRow === iRowActive ? 'active' : ''"
           :key="i"
         >
           <div v-if="i < row.length - 1">

@@ -25,23 +25,6 @@ export const transactionsStore = defineStore('transactions', () => {
     updateCount.value = updateCount.value + 1
   }
 
-  async function getTables() {
-    let response = await remote.get_tables()
-    return response.result
-  }
-
-  function updateRow(row) {
-    for (let storeRow of rows.value) {
-      const iId = 0
-      if (storeRow[iId] === row[iId]) {
-        for (let i = 1; i < row.length; i += 1) {
-          storeRow[i] = row[i]
-        }
-      }
-    }
-    updateCount.value = updateCount.value + 1
-  }
-
   async function updateCategory(id, category) {
     for (let storeRow of rows.value) {
       if (storeRow[0] === id) {
@@ -69,8 +52,6 @@ export const transactionsStore = defineStore('transactions', () => {
     updateCount,
     loadTransactions,
     loadCategories,
-    updateRow,
-    getTables,
     updateCategory,
     autofill
   }

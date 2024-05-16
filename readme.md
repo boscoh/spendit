@@ -1,30 +1,20 @@
-# num-app
+# spendit
 
-Skeleton data webapp that runs both locally and remotely, with usef dev setup options.
+Skeleton data webapp that runs both locally and remotely, with  dev setup options.
 
-- equivalent Vue3, React and Svelte
-- simple rpc-json bridge
-- fastapi server 
-- dev mode for server and client
-- auto startup for dev
-- cli startup mode
-- random ports means multiple copies can be started
+- equivalent Vue3, React and Svelte clients
+- rpc bridge to fastapi python server
+- convenient clie with dev modes for server and client, and port mappings
 
 ## CLIENT
 
 For all clients, the following has been implemented:
-- routes
-- bootstrap
-- reactive states
+- dynamic routes
 - global store
-- rpc load/update from server
-
-_todo_:
-  - param in routes
-  - state
-  - load file into db
-  - plotly graph of data
-  - transactions from kaggle
+- modals
+- fully interactive graph
+- crud and forms to db
+- bootstrap styles for cross-framework designs
 
 ### Client
 
@@ -46,5 +36,14 @@ cd client-react && npm i && npm run dev
 
 ### todo
 - merge datasets
-- offsetDays/categories save in db per table
-- change main name for python import
+- names: spendit vs. sortable
+- generate fake data
+- update api for svelte/react
+@done
+- offsetDays/categories save in db per table @done
+- redo database 
+- change main name for python import @done
+- state @done
+- load file into db @done
+- plotly graph of data @done
+

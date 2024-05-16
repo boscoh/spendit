@@ -1,5 +1,5 @@
 <script>
-    import {autofillTable, categories, keyLock, table} from '../../../store.js';
+    import {autofillReport, categories, keyLock, table} from '../../../store.js';
 </script>
 
 <div class="d-inline">
@@ -26,7 +26,7 @@
         <button
                 class="btn btn-outline-primary"
                 on:click={(e) => {
-				autofillTable($table, $categories);
+				autofillReport($table, $categories);
 			}}
         >
             Recalculate

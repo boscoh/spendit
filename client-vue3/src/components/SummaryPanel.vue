@@ -10,10 +10,15 @@ const summaries = ref([])
 const nDay = ref(null)
 const nWeek = ref(null)
 const nMonth = ref(null)
-const offsetDay = ref(0)
 
 watch(
-  () => [store.updateCount, offsetDay.value, store.categories],
+  () => [store.offsetDays],
+  () => {
+    store.updateOffsetDays()
+  }
+)
+watch(
+  () => [store.updateCount, store.offsetDays, store.categories],
   () => {
     if (!store.categories) {
       return
@@ -28,7 +33,7 @@ watch(
     times = _.map(times, DateTime.fromISO)
     times.sort((a, b) => b - a)
     let interval = Interval.fromDateTimes(_.last(times), _.head(times))
-    nDay.value = interval.length('days') - offsetDay.value
+    nDay.value = interval.length('days') - store.offsetDays
     nWeek.value = (nDay.value / 7).toFixed(2)
     nMonth.value = (nDay.value / 30).toFixed(2)
 
@@ -100,11 +105,11 @@ watch(
     <p>
       Day = {{ nDay }} &nbsp; Week = {{ nWeek }} &nbsp; Month = {{ nMonth }}
       <div class="d-flex flex-row gap-2 align-items-center">
-        <label for="offsetDay">Skip Days =</label>
+        <label for="store.offsetDays">Skip Days =</label>
         <input
           class="form-control"
           id="offsetDay"
-          v-model="offsetDay"
+          v-model="store.offsetDays"
           style="width: 4.5em"
           type="number"
           required

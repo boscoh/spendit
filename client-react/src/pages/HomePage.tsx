@@ -1,14 +1,14 @@
 import { ChangeEvent, useEffect, useState } from 'react'
-import { getTables } from '../fetch.tsx'
 import { remoteUpload } from '../../../rpc/rpc.js'
 import NavBar from '../features/NavBar.tsx'
+import {fetchReports} from "../store";
 
 function HomePage() {
     const [tables, setTables] = useState([])
     const [file, setFile] = useState<File | null>(null)
 
     async function reset() {
-        setTables(await getTables())
+        setTables(await fetchReports())
     }
 
     function handleFileChange(e: ChangeEvent<HTMLInputElement>) {

@@ -18,7 +18,7 @@ const layout = {
   title: ''
 }
 
-function onPlotlyClick(data) {
+function onClick(data) {
   const point = data.points[0]
   store.clickTransaction = { time: point.x, category: point.data.name.split(' ')[0] }
 }
@@ -31,7 +31,7 @@ watch(
       categories = _.filter(categories, (c) => c.key === store.filterCategory)
     }
 
-    let newPlotData = []
+    let newData = []
     for (let category of categories) {
       if (category.key === 'X') {
         continue
@@ -50,16 +50,13 @@ watch(
           dataset.y.push(cumul)
         }
       }
-      newPlotData.push(dataset)
+      newData.push(dataset)
     }
-
-    data.value = newPlotData
+    data.value = newData
   }
 )
 </script>
 
-<style scoped></style>
-
 <template>
-  <VuePlotly @plotly_click="onPlotlyClick" :data="data" :layout="layout"></VuePlotly>
+  <VuePlotly @plotly_click="onClick" :data="data" :layout="layout"></VuePlotly>
 </template>

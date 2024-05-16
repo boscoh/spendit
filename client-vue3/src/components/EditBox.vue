@@ -1,25 +1,22 @@
 <script setup>
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { transactionsStore } from '../stores/transactionsStore.js'
 
 const store = transactionsStore()
 const props = defineProps(['text', 'handleText'])
-const newInput = ref('')
-const inputRef = ref(null)
+const inputText = ref('')
+const input = ref(null)
 const isEdit = ref(false)
 const style = 'font-size: 1.2em; font-weight: 500'
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-async function startEdit() {
-  newInput.value = props.text
+function startEdit() {
+  inputText.value = props.text
   isEdit.value = true
-  await sleep(200)
-  inputRef.value.focus()
-  document.addEventListener('keydown', handleEscape)
-  store.keyLock = true
+  nextTick(() => {
+    document.addEventListener('keydown', handleEscape)
+    store.keyLock = true
+    input.value.focus()
+  })
 }
 
 function cleanup() {
@@ -31,12 +28,10 @@ function cleanup() {
 function handleEscape(e) {
   if (e.key === 'Escape') {
     cleanup()
+  } else if (e.key === 'Enter') {
+    props.handleText(inputText.value)
+    cleanup()
   }
-}
-
-async function submitText() {
-  cleanup()
-  props.handleText(newInput.value)
 }
 </script>
 
@@ -48,12 +43,11 @@ async function submitText() {
       <input
         type="text"
         :style="style"
-        ref="inputRef"
-        v-model="newInput"
+        ref="input"
+        v-model="inputText"
         @blur="cleanup"
         class="form-control"
       />
-      <button class="btn btn-outline-primary" @click="submitText">Rename</button>
     </template>
     <template v-else>
       <div :style="style" class="form-control" @click="startEdit">{{ props.text }}</div>

@@ -11,7 +11,7 @@ interface IEditBox {
 export default function EditBox(props: IEditBox) {
     const dispatch = useDispatch()
     const [isEdit, setIsEdit] = useState(false)
-    const [newText, setNewText] = useState('')
+    const [inputText, setInputTextText] = useState(props.text)
     const inputStyle = { fontSize: '1 .3em', fontWeight: 500 }
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -21,10 +21,10 @@ export default function EditBox(props: IEditBox) {
 
     async function startEdit() {
         setIsEdit(true)
-        setNewText(props.text)
+        setInputTextText(props.text)
         dispatch(set({ keyLock: true }))
+        document.addEventListener('keydown', onKeyDown)
         await sleep(200)
-        document.addEventListener('keydown', handleEscape)
         if (inputRef.current) {
             inputRef.current.focus()
         }
@@ -33,22 +33,24 @@ export default function EditBox(props: IEditBox) {
     function cleanup() {
         setIsEdit(false)
         dispatch(set({ keyLock: false }))
-        document.removeEventListener('keydown', handleEscape)
+        document.removeEventListener('keydown', onKeyDown)
     }
 
-    function handleEscape(e: KeyboardEvent) {
+    function onKeyDown(e: KeyboardEvent) {
         if (e.key === 'Escape') {
+            cleanup()
+        }
+        if (e.key === 'Enter') {
+            if (inputRef.current) {
+                const newReport = inputRef.current.value
+                props.handleText(newReport)
+            }
             cleanup()
         }
     }
 
-    async function submitText() {
-        cleanup()
-        props.handleText(newText)
-    }
-
     function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-        setNewText(e.target.value)
+        setInputTextText(e.target.value)
     }
 
     if (isEdit) {
@@ -58,17 +60,11 @@ export default function EditBox(props: IEditBox) {
                     type="text"
                     ref={inputRef}
                     style={inputStyle}
-                    value={newText}
+                    value={inputText}
                     onChange={handleInputChange}
                     className="form-control"
                     onBlur={cleanup}
                 />
-                <button
-                    className="btn btn-outline-primary"
-                    onClick={submitText}
-                >
-                    Rename
-                </button>
             </div>
         )
     } else {

@@ -1,11 +1,16 @@
 <script>
     import _ from 'lodash'
     import {DateTime, Interval} from 'luxon'
-    import {categories, rows} from "../../../store.js";
+    import {categories, offset, rows, updateOffsetDays} from "../../../store.js";
 
     let offsetDay = 0
     $: interval = getInterval($rows, offsetDay)
     $: summaries = getSummaries($rows, $categories, interval)
+    $: offsetDay = $offset
+
+    function onOffsetChange(e) {
+        updateOffsetDays(e.target.value)
+    }
 
     function getInterval(rows, offsetDay) {
         if (!rows.length) {
@@ -62,30 +67,30 @@
 
 <div class="d-inline">
     <button
-            class="btn btn-outline-primary"
-            type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#summaryOffCanvas"
             aria-controls="summaryOffCanvas"
+            class="btn btn-outline-primary"
+            data-bs-target="#summaryOffCanvas"
+            data-bs-toggle="offcanvas"
+            type="button"
     >
         Summary
     </button>
 </div>
 
 <div
-        class="offcanvas offcanvas-start"
-        tabindex="-1"
-        id="summaryOffCanvas"
         aria-labelledby="summaryOffCanvasLabel"
+        class="offcanvas offcanvas-start"
+        id="summaryOffCanvas"
+        tabindex="-1"
 >
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="summaryOffCanvasLabel">Summary</h5>
         <div class="px-2"></div>
         <button
-                type="button"
+                aria-label="Close"
                 class="btn-close"
                 data-bs-dismiss="offcanvas"
-                aria-label="Close"
+                type="button"
         ></button>
     </div>
     <div class="offcanvas-body">
@@ -95,12 +100,13 @@
         <div class="d-flex flex-row gap-2 align-items-center">
             <label for="offsetDay">Skip Days =</label>
             <input
+                    bind:value={offsetDay}
                     class="form-control"
                     id="offsetDay"
-                    bind:value={offsetDay}
+                    required
                     style="width: 4.5em"
                     type="number"
-                    required
+                    on:change={onOffsetChange}
             />
         </div>
         <table class="table">

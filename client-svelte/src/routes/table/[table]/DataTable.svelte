@@ -1,10 +1,17 @@
 <script>
-	import {remote} from '../../../../../rpc/rpc.js';
-	import {onMount} from 'svelte';
-	import {categories, clickTransaction,updateCategory, filterCategory, headers, keyLock, rows, table} from '../../../store.js';
-	import _ from 'lodash';
+    import {onMount} from 'svelte';
+    import {
+        categories,
+        clickTransaction,
+        filterCategory,
+        headers,
+        keyLock,
+        rows,
+        updateCategory
+    } from '../../../store.js';
+    import _ from 'lodash';
 
-	let iRowActive = 0;
+    let iRowActive = 0;
     $: filteredRows = displayRows($rows, $filterCategory);
     $: dummy = handleClick(filteredRows, $clickTransaction);
 
@@ -76,7 +83,6 @@
 </script>
 
 <style>
-    table thead th { position: sticky; top: 0; z-index: 2000; background-color: white}
 </style>
 
 <table class="table">

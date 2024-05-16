@@ -14,6 +14,7 @@ interface ITransactions {
     categories: ICategory[]
     filterCategory: string
     keyLock: boolean
+    offset: number
     clickTransaction: { [id: string] : string; }
 }
 
@@ -26,6 +27,7 @@ const transactionsSlice = createSlice({
         categories: [],
         filterCategory: '',
         keyLock: false,
+        offset: 0,
         clickTransaction: {}
     } as ITransactions,
     reducers: {
@@ -54,18 +56,23 @@ const transactionsSlice = createSlice({
             if (action.payload.filterCategory) {
                 state.filterCategory = action.payload.filterCategory
             }
+            if (action.payload.offset) {
+                state.offset = action.payload.offset
+            }
         },
-        updateCategory: (
+        setCategoryOfRow: (
             state: ITransactions,
             action: PayloadAction<{ id: string; category: string }>
         ) => {
-            const row = _.find(state.rows, r => r[0] === action.payload.id)
+            const rows = _.clone(state.rows)
+            const row = _.find(rows, r => r[0] === action.payload.id)
             if (row) {
                 const iCol = state.headers.indexOf('category')
                 row[iCol] = action.payload.category
             }
+            state.rows = rows
         },
-        updateFilterOfCategory: (
+        setCategoryFilter: (
             state: ITransactions,
             action: PayloadAction<{ categoryKey: string; filter: string }>
         ) => {
@@ -83,8 +90,8 @@ const transactionsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
     set,
-    updateFilterOfCategory,
-    updateCategory,
+    setCategoryFilter,
+    setCategoryOfRow,
 } = transactionsSlice.actions
 
 export type { ICategory, ITransactions }

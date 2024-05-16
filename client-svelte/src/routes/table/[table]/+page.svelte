@@ -2,8 +2,7 @@
     import {page} from '$app/stores'
     import {goto} from '$app/navigation';
     import {onMount} from "svelte";
-    import {categories, filterCategory, loadTable, table} from "../../../store.js";
-    import {remote} from "../../../../../rpc/rpc.js";
+    import {categories, deleteReport, filterCategory, loadReport, updateReportName, table} from "../../../store.js";
 
     import DataTable from './DataTable.svelte';
     import CategoryPlot from './CategoryPlot.svelte';
@@ -11,20 +10,18 @@
     import SummaryPanel from "./SummaryPanel.svelte";
     import EditBox from "./EditBox.svelte";
 
-    async function renameTable(newTable) {
-        await remote.rename_table($table, newTable)
-        console.log('renameTable', $table, '->', newTable)
+    async function onRename(newTable) {
+        await updateReportName(newTable)
         await goto(`/table/${newTable}`)
-        await loadTable(newTable)
     }
 
-    async function deleteTable() {
-        await remote.delete_table($table)
+    async function onDelete() {
+        await deleteReport($table)
         goto('/')
     }
 
     onMount(() => {
-        loadTable($page.params.table)
+        loadReport($page.params.table)
     })
 </script>
 
@@ -34,8 +31,8 @@
 
 <div class="d-flex flex-column p-3" style="height: calc(100vh - 70px)">
     <div class="d-flex flex-row justify-content-between align-items-center">
-        <EditBox text={$table} handleText={renameTable}></EditBox>
-        <button class="btn btn-outline-primary" on:click={deleteTable}>Delete</button>
+        <EditBox handleText={onRename} text={$table}></EditBox>
+        <button class="btn btn-outline-primary" on:click={onDelete}>Delete</button>
     </div>
 
     <div style="width: 100%;">
@@ -47,9 +44,9 @@
         <SummaryPanel/>
         <div>
             <select
-                    class="form-select"
                     aria-label="Default select example"
                     bind:value={$filterCategory}
+                    class="form-select"
             >
                 <option selected value={null}>-- all --</option>
                 {#each $categories as c}

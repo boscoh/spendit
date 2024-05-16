@@ -31,12 +31,11 @@
     function handleEscape(e) {
         if (e.key === 'Escape') {
             cleanup()
-        }
-    }
+        } if (e.key === 'Enter') {
+            console.log('handleEscape', newInput)
+            handleText(newInput)
 
-    async function submitText() {
-        cleanup()
-        handleText(newInput)
+        }
     }
 
 </script>
@@ -51,12 +50,6 @@
                 on:blur={cleanup}
                 class="form-control"
         />
-        <button
-                class="btn btn-outline-primary"
-                on:click={submitText}
-        >
-            Rename
-        </button>
     {:else}
         <button
                 style={style}

@@ -12,15 +12,11 @@ else
     exit 1
 fi
 
-if command -v psword &> /dev/null
-then
-  psword -k MacOS/Python
-  psword -k node
-  psword -k mambaforge
-  psword -k python
+if [ ! -d "clear.sh" ]; then
+  ./clear.sh
 fi
 
-ttab "source .venv/bin/activate; cd server; python cli.py run --dev"
+ttab "source .venv/bin/activate; cd spendit; python cli.py run --dev"
 
 # set apiUrl set for client
 cd rpc

@@ -8,41 +8,28 @@ import EditBox from '@/components/EditBox.vue'
 import { onMounted, watch } from 'vue'
 import { transactionsStore } from '../stores/transactionsStore.js'
 import { useRoute, useRouter } from 'vue-router'
-import { remote, saveTextFile } from '../../../rpc/rpc.js'
 
 const store = transactionsStore()
 const route = useRoute()
 const router = useRouter()
 
-async function downloadCsv() {
-  const response = await remote.get_csv(store.table)
-  if ('result' in response) {
-    saveTextFile(response.result, `${store.table}.csv`)
-  }
-}
-
 async function deleteTable() {
-  await remote.delete_table(store.table)
+  await store.deleteReport()
   await router.push('/')
 }
 
 async function renameTable(newTable) {
-  await remote.rename_table(store.table, newTable)
-  store.table = newTable
+  await store.updateReportName(newTable)
   await router.replace(`/table/${newTable}`)
 }
 
-onMounted(() => {
-  store.loadCategories()
-  store.loadTransactions(route.params.table)
-})
+function reset() {
+  store.loadReport(route.params.table)
+}
 
-watch(
-  () => route.params.table || store.updateCount,
-  () => {
-    store.loadTransactions(route.params.table)
-  }
-)
+onMounted(reset)
+
+watch(() => route.params.table, reset)
 </script>
 
 <template>
@@ -58,7 +45,7 @@ watch(
       <div class="d-flex flex-row gap-2 my-2">
         <AutofillPanel />
         <SummaryPanel />
-        <button class="btn btn-outline-primary" @click="downloadCsv()">CSV</button>
+        <button class="btn btn-outline-primary" @click="store.downloadCsv">CSV</button>
         <div>
           <select
             class="form-select"

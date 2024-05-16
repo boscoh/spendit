@@ -2,10 +2,8 @@ import { ChangeEvent, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { IRootState } from '../store'
+import {deleteReport, downloadCsv, IRootState, loadReport, updateReportName} from '../store'
 import { set } from '../store/transactionsSlice.tsx'
-import { remote, saveTextFile } from '../../../rpc/rpc.ts'
-import { fetchTransactions } from '../fetch.tsx'
 
 import NavBar from '../features/NavBar.tsx'
 import TransactionTable from '../features/TransactionTable.tsx'
@@ -30,7 +28,7 @@ function TablePage() {
 
     useEffect(() => {
         if (params.table && params.table !== transactions.table) {
-            fetchTransactions(params.table)
+            loadReport(params.table)
         }
     }, [])
 
@@ -38,21 +36,13 @@ function TablePage() {
         dispatch(set({ filterCategory: e.target.value }))
     }
 
-    async function downloadCsv() {
-        const response = await remote.get_csv(transactions.table)
-        if ('result' in response) {
-            saveTextFile(response.result, 'transactions.csv')
-        }
-    }
-
-    async function deleteTable() {
-        await remote.delete_table(transactions.table)
+    async function onDelete() {
+        await deleteReport()
         navigate('/')
     }
 
-    async function renameTable(newTable: string) {
-        dispatch(set({ table: newTable }))
-        await remote.rename_table(transactions.table, newTable)
+    async function onRename(newTable: string) {
+        await updateReportName(newTable)
         navigate(`/table/${newTable}`)
     }
 
@@ -67,11 +57,11 @@ function TablePage() {
                 <div className="d-flex flex-row justify-content-between align-items-center">
                     <EditBox
                         text={transactions.table}
-                        handleText={renameTable}
+                        handleText={onRename}
                     ></EditBox>
                     <button
                         className="btn btn-outline-primary"
-                        onClick={deleteTable}
+                        onClick={onDelete}
                     >
                         Delete
                     </button>

@@ -1,19 +1,20 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { remote, remoteUpload } from '../../../rpc/rpc.js'
+import { remoteUpload } from '../../../rpc/rpc.js'
+import { transactionsStore } from '../stores/transactionsStore.js'
 
 const tables = ref([])
 const uploadInput = ref(null)
 const uploadForm = ref(null)
+const store = transactionsStore()
 
 async function reset() {
-  let response = await remote.get_tables()
-  tables.value = response.result
+  tables.value = await store.getReports()
 }
 
 async function submit() {
   const file = uploadInput.value.files[0]
-   await remoteUpload(file, 'upload_csv')
+  await remoteUpload(file, 'upload_csv')
   uploadInput.value.value = null
   await reset()
 }

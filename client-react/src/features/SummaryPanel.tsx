@@ -1,7 +1,8 @@
 import { useSelector } from 'react-redux'
-import { IRootState } from '../store'
+import {IRootState, updateOffset} from '../store'
 import { ICategory } from '../store/transactionsSlice.tsx'
 import { DateTime, Interval } from 'luxon'
+import { useEffect, useState } from 'react'
 import _ from 'lodash'
 
 export default function SummaryPanel() {
@@ -12,7 +13,7 @@ export default function SummaryPanel() {
     }
 
     const transactions = useSelector((state: IRootState) => state.transactions)
-    let offsetDay = 0
+    const [offsetDay, setOffsetDay] = useState(0)
     const interval = getInterval(transactions.rows, offsetDay)
     const summaries = getSummaries(
         transactions.rows,
@@ -20,9 +21,15 @@ export default function SummaryPanel() {
         interval
     )
 
-    function changeOffset(newOFfset: string) {
-        offsetDay = _.parseInt(newOFfset)
+    async function changeOffset(s: string) {
+        const newOffset = _.parseInt(s)
+        setOffsetDay(newOffset)
+        await updateOffset(newOffset)
     }
+
+    useEffect(() => {
+        setOffsetDay(transactions.offset)
+    }, [transactions.offset])
 
     function getInterval(
         rows: (string | number)[][],

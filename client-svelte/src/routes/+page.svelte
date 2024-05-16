@@ -1,6 +1,6 @@
 <script>
     import {onMount} from "svelte"
-    import {getTables, tables} from "../store.js"
+    import {getReportList, tables} from "../store.js"
     import {remoteUpload} from "../../../rpc/rpc.js";
 
     let files = [];
@@ -9,14 +9,14 @@
         console.log('submit', files)
         const file = files[0]
         await remoteUpload(file, 'upload_csv')
-        await getTables()
+        await getReportList()
         const inputElement = document.querySelector(".form-control")
         if (inputElement) {
             inputElement.value = ""
         }
     }
 
-    onMount(getTables)
+    onMount(getReportList)
 </script>
 
 <svelte:head>

@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
-import { IRootState } from '../store'
-import { set, updateFilterOfCategory } from '../store/transactionsSlice.tsx'
-import { autofill } from '../fetch.tsx'
+import {autofill, IRootState} from '../store'
+import { set, setCategoryFilter } from '../store/transactionsSlice.tsx'
 import _ from 'lodash'
 
 export default function AutofillPanel() {
@@ -17,7 +16,7 @@ export default function AutofillPanel() {
     }
 
     function changeFilter(categoryKey: string, filter: string) {
-        dispatch(updateFilterOfCategory({ categoryKey, filter }))
+        dispatch(setCategoryFilter({ categoryKey, filter }))
     }
 
     return (

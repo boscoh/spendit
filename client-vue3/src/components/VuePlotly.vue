@@ -5,7 +5,7 @@
 <script setup>
 import { v4 as uuidv4 } from 'uuid'
 import Plotly from 'plotly.js-dist'
-import { defineEmits, defineProps, onBeforeUnmount, ref, watchEffect } from 'vue'
+import { onBeforeUnmount, ref, watchEffect } from 'vue'
 
 const props = defineProps(['data', 'layout', 'config'])
 const emit = defineEmits([
@@ -25,29 +25,25 @@ const emit = defineEmits([
 ])
 let plotlyId = ref(`plotly-${uuidv4()}`)
 let container = ref(null)
-let plot = null
+let isRendered = false
 let resizeObserver = null
 
 function debounce(func, timeout = 300) {
   let timer
   return (...args) => {
     clearTimeout(timer)
-    timer = setTimeout(() => {
-      func.apply(this, args)
-    }, timeout)
+    timer = setTimeout(() => func(...args), timeout)
   }
 }
 
-function resize() {
-  Plotly.Plots.resize(container.value)
-}
+const resize = debounce(() => Plotly.Plots.resize(container.value), 50)
 
-function react() {
+function update() {
   Plotly.react(plotlyId.value, props.data, props.layout, props.config)
 }
 
-function init(div) {
-  plot = Plotly.newPlot(div.id, props.data, props.layout, props.config)
+async function render() {
+  const div = await Plotly.newPlot(plotlyId.value, props.data, props.layout, props.config)
   const events = [
     'plotly_click',
     'plotly_hover',
@@ -64,19 +60,28 @@ function init(div) {
     'plotly_afterplot'
   ]
   events.forEach((name) => div.on(name, (...args) => emit(name, ...args)))
-  resizeObserver = new ResizeObserver(debounce(resize, 50))
+  resizeObserver = new ResizeObserver(resize)
   resizeObserver.observe(div)
 }
+
+watchEffect(() => {
+  if (container.value) {
+    if (!isRendered) {
+      render()
+      isRendered = true
+    } else {
+      update()
+    }
+  }
+})
 
 onBeforeUnmount(() => {
   resizeObserver.disconnect()
 })
 
-watchEffect(() => {
-  if (plot) {
-    react()
-  } else if (container.value) {
-    init(container.value)
-  }
-})
+function downloadImage(imageProps = { format: 'png', width: 800, height: 600, filename: 'plot' }) {
+  Plotly.downloadImage(container.value, imageProps)
+}
+
+defineExpose({ plotlyId, render, update, resize, downloadImage })
 </script>

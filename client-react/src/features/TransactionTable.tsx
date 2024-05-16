@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { IRootState } from '../store'
-import { updateCategory } from '../store/transactionsSlice.tsx'
-import { remote } from '../../../rpc/rpc.ts'
+import { useSelector } from 'react-redux'
+import { IRootState, updateCategory } from '../store'
 import _ from 'lodash'
 import { DateTime } from 'luxon'
 
 export default function TransactionTable() {
     const [iRowActive, _setIRowActive] = useState<number>(0)
-    const dispatch = useDispatch()
     const transactions = useSelector((state: IRootState) => state.transactions)
     const nCol = transactions.headers.length
     const iColLast = nCol - 1
@@ -78,17 +75,9 @@ export default function TransactionTable() {
             const category = event.key.toUpperCase()
             if (_.find(transactions.categories, (c) => c.key === category)) {
                 const id = rows[iRowActive][0]
-                await remote.update_transactions(transactions.table, id, {
-                    category,
-                })
-                dispatch(updateCategory({ category, id }))
+                await updateCategory(id, category)
             }
         }
-    }
-
-    async function changeCategory(id: string, category: string) {
-        await remote.update_transactions(transactions.table, id, { category })
-        dispatch(updateCategory({ id, category }))
     }
 
     function formatValue(row: string[], iCol: number, id: string) {
@@ -110,7 +99,7 @@ export default function TransactionTable() {
             <select
                 className="form-select"
                 value={val ? val : ''}
-                onChange={(e) => changeCategory(id, e.target.value)}
+                onChange={(e) => updateCategory(id, e.target.value)}
             >
                 {options.map(({ key, desc }) => (
                     <option value={key} key={key}>

@@ -1,5 +1,6 @@
 # !/usr/bin/env python
 import inspect
+import json
 import logging
 import os
 import socket
@@ -10,7 +11,6 @@ import webbrowser
 from contextlib import closing
 from io import BytesIO
 from urllib.request import urlopen
-import json
 
 import colorama
 import psutil

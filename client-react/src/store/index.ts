@@ -47,7 +47,7 @@ export async function autofill() {
 }
 
 export async function fetchReports() {
-    const response = await remote.get_reports()
+    const response = await remote.get_report_names()
     if ('result' in response) {
         return response.result
     }

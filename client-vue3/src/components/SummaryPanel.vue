@@ -75,11 +75,11 @@ watch(
 <template>
 <div class="d-inline">
   <button
-    class="btn btn-outline-primary"
+    class="btn btn-outline-secondary"
     type="button"
     data-bs-toggle="offcanvas"
-    data-bs-target="#summaryOffCanvas"
-    aria-controls="summaryOffCanvas"
+    data-bs-target="#summary-panel"
+    aria-controls="summary-panel"
   >
     Summary
   </button>
@@ -88,11 +88,11 @@ watch(
 <div
   class="offcanvas offcanvas-start"
   tabindex="-1"
-  id="summaryOffCanvas"
-  aria-labelledby="summaryOffCanvasLabel"
+  id="summary-panel"
+  aria-labelledby="summary-title"
 >
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="summaryOffCanvasLabel">Summary</h5>
+    <h5 class="offcanvas-title" id="summary-title">Summary</h5>
     <div class="px-2"></div>
     <button
       type="button"

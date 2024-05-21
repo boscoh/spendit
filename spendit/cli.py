@@ -7,8 +7,6 @@ import structlog
 from path import Path
 
 this_dir = Path(__file__).parent
-# hack to load sibling modules for cli.py
-sys.path.append(this_dir)
 logger = structlog.get_logger(__name__)
 
 
@@ -25,7 +23,9 @@ def run(dev, port, csv):
     """
     Run the data server
     """
-    from app import run_server
+    # hack to load sibling modules for cli.py
+    sys.path.append(this_dir.parent)
+    from spendit.app import run_server
 
     if csv:
         csv = str(Path(csv).abspath())
@@ -40,8 +40,10 @@ def open_url(url):
     """
     Waits for server staring before opening built client
     """
-    from app import open_url_in_background
-    from fs import load_yaml
+    # hack to load sibling modules for cli.py
+    sys.path.append(this_dir.parent)
+    from spendit.app import open_url_in_background
+    from spendit.fs import load_yaml
 
     app_yaml = this_dir / "app.yaml"
     while not app_yaml.exists():

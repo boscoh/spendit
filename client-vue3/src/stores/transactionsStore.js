@@ -18,9 +18,7 @@ export const transactionsStore = defineStore('transactions', () => {
 
     let reportResponses = await remote.get_report_row(newTable)
     const report = reportResponses.result
-
     categories.value = JSON.parse(report.json_categories)
-
     offsetDays.value = report.offset_days
 
     let transactionResponse = await remote.get_transactions(newTable)
@@ -30,7 +28,7 @@ export const transactionsStore = defineStore('transactions', () => {
     updateCount.value = updateCount.value + 1
   }
 
-  async function updateCategory(rowId, category) {
+  async function updateCategoryOfRow(rowId, category) {
     for (let storeRow of rows.value) {
       if (storeRow[0] === rowId) {
         storeRow[storeRow.length - 1] = category
@@ -44,8 +42,12 @@ export const transactionsStore = defineStore('transactions', () => {
     await remote.update_report(table.value, { offset_days: offsetDays.value })
   }
 
-  async function autofill() {
+  async function updateCategories() {
     await remote.update_categories(categories.value, table.value)
+  }
+
+  async function autofill() {
+    await updateCategories()
     await remote.autofill(table.value)
     loadReport(table.value)
   }
@@ -55,7 +57,7 @@ export const transactionsStore = defineStore('transactions', () => {
     table.value = newName
   }
 
-  async function downloadCsv() {
+  async function downloadReportCsv() {
     const response = await remote.get_csv(table.value)
     if ('result' in response) {
       saveTextFile(response.result, `${table.value}.csv`)
@@ -66,8 +68,8 @@ export const transactionsStore = defineStore('transactions', () => {
     await remote.delete_report(table.value)
   }
 
-  async function getReports() {
-    let response = await remote.get_reports()
+  async function getReportNames() {
+    let response = await remote.get_report_names()
     if ('result' in response) {
       return response.result
     }
@@ -86,10 +88,11 @@ export const transactionsStore = defineStore('transactions', () => {
     loadReport,
     updateOffsetDays,
     updateReportName,
-    updateCategory,
-    downloadCsv,
+    updateCategories,
+    updateCategoryOfRow,
+    downloadReportCsv,
     autofill,
     deleteReport,
-    getReports
+    getReportNames: getReportNames
   }
 })

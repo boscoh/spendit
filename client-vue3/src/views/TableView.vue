@@ -1,13 +1,17 @@
 <script setup>
+import { onMounted, watch } from 'vue'
+import { transactionsStore } from '../stores/transactionsStore.js'
+import { useRoute, useRouter } from 'vue-router'
+
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faTrash } from '@fortawesome/free-solid-svg-icons'
+
 import DataTable from '../components/TransactionTable.vue'
 import CategoryPlot from '../components/CategoryPlot.vue'
 import AutofillPanel from '../components/AutofillPanel.vue'
 import SummaryPanel from '../components/SummaryPanel.vue'
 import EditBox from '@/components/EditBox.vue'
-
-import { onMounted, watch } from 'vue'
-import { transactionsStore } from '../stores/transactionsStore.js'
-import { useRoute, useRouter } from 'vue-router'
+import CategoriesPanel from '@/components/CategoriesPanel.vue'
 
 const store = transactionsStore()
 const route = useRoute()
@@ -36,7 +40,9 @@ watch(() => route.params.table, reset)
   <div class="p-3 d-flex flex-column" style="height: calc(100vh - 56px)">
     <div class="d-flex flex-row justify-content-between align-items-center">
       <edit-box :text="store.table" :handle-text="renameTable"></edit-box>
-      <button class="btn btn-outline-primary" @click="deleteTable(table)">Delete</button>
+      <button class="btn btn-outline-secondary" @click="deleteTable(table)">
+        <FontAwesomeIcon :icon="faTrash"></FontAwesomeIcon>
+      </button>
     </div>
 
     <CategoryPlot />
@@ -44,8 +50,9 @@ watch(() => route.params.table, reset)
     <div class="d-flex flex-row justify-content-between">
       <div class="d-flex flex-row gap-2 my-2">
         <AutofillPanel />
+        <CategoriesPanel />
         <SummaryPanel />
-        <button class="btn btn-outline-primary" @click="store.downloadCsv">CSV</button>
+        <button class="btn btn-outline-secondary" @click="store.downloadReportCsv">CSV</button>
         <div>
           <select
             class="form-select"

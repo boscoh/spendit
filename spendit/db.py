@@ -2,7 +2,6 @@ import json
 import logging
 import sqlite3
 
-import duckdb
 import pandas
 from path import Path
 from pydash import py_
@@ -122,7 +121,7 @@ class SqliteDb:
 
     def drop_table(self, table):
         if table in self.get_tables():
-            self.execute(f'DROP TABLE {table}')
+            self.execute(f"DROP TABLE {table}")
             self.commit()
 
     def rename_table(self, table, new_table):

@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import socket
+import sys
 import threading
 import time
 import traceback
@@ -24,19 +25,25 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, StreamingResponse
 from starlette.staticfiles import StaticFiles
 
-import handlers
-from fs import dump_yaml
-from fs import get_time_str
+from . import handlers
+from .fs import dump_yaml, get_time_str
 
 logger = structlog.get_logger(__name__)
 this_dir = Path(__file__).parent
 
 
 def make_app(config):
-    config = Dict(config)
+    """
+    :param config: dict
+        data_dir: str - location of sqlite db and where to store downloaded files
+        dev: boolean - triggers dev mode, running in dev mode with hot reload
+    """
     client_dir = this_dir / "client"
-    data_dir = this_dir / "data"
-    config.data_dir = data_dir
+
+    config = Dict(config)
+    if "data_dir" not in config:
+        config.data_dir = this_dir / "data"
+    data_dir = config.data_dir
 
     logger.info("make_app", config=config)
 
@@ -266,10 +273,11 @@ def run_server(config):
             f"http://localhost:{config.port}",
             "http://localhost:5173",
         )
-        # Save app.yaml so uvicorn run:app can load config
-        this_dir.chdir()
-        dump_yaml(config, "app.yaml")
-        os.system(f"uvicorn run:app --reload --port {config.port}")
+        # Need to run from here for relative imports in spending.run in uvicorn
+        this_dir.parent.chdir()
+        # Save app.yaml so uvicorn spendit.run:app can load config
+        dump_yaml(config, "spendit/app.yaml")
+        os.system(f"uvicorn spendit.run:app --reload --port {config.port}")
     else:  # production mode
         # open pre-built client
         if not config.port:

@@ -12,11 +12,13 @@ else
     exit 1
 fi
 
-if [ ! -d "clear.sh" ]; then
-  ./clear.sh
+cd "$(dirname "$0")"
+
+if [ -f ./sh/clear_ps.sh ]; then
+  ./sh/clear_ps.sh
 fi
 
-ttab "source .venv/bin/activate; cd spendit; python cli.py run --dev"
+ttab "source .venv/bin/activate; cd spendit; python3 cli.py run --dev"
 
 # set apiUrl set for client
 cd rpc

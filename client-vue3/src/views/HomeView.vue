@@ -9,7 +9,7 @@ const uploadForm = ref(null)
 const store = transactionsStore()
 
 async function reset() {
-  tables.value = await store.getReports()
+  tables.value = await store.getReportNames()
 }
 
 async function submit() {

@@ -58,7 +58,7 @@ async function onKeydown(event) {
     let category = event.key.toUpperCase()
     if (_.find(store.categories, (c) => c.key === category)) {
       const id = filteredRows.value[iRowActive.value][0]
-      await store.updateCategory(id, category)
+      await store.updateCategoryOfRow(id, category)
     }
   }
 }
@@ -106,7 +106,7 @@ td {
             <select
               class="form-select"
               aria-label="Default select example"
-              @change="(e) => store.updateCategory(row[0], e.target.value)"
+              @change="(e) => store.updateCategoryOfRow(row[0], e.target.value)"
               @focus="iRowActive = iRow"
             >
               <option selected :value="null">-- select an option --</option>

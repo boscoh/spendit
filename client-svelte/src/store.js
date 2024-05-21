@@ -36,7 +36,7 @@ export async function autofillReport(table, categories) {
 }
 
 export async function getReportList() {
-	const response = await remote.get_reports();
+	const response = await remote.get_report_names();
 	if ('result' in response) {
 		tables.set(response.result);
 	}

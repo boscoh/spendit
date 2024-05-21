@@ -1,32 +1,42 @@
-[tool.poetry]
+[project]
 name = "spendit"
-version = "1.0"
-description = "num app"
-authors = ["Bosco Ho <apposite@gmail.com>"]
-readme = "readme.md"
-packages = [{include = "spendit"}]
+version = "0.1.0"
+description = "Data viz cli/web app"
+authors = [
+    { name = "Bosco Ho", email = "apposite@gmail.com" }
+]
+dependencies = [
+    "addict",
+    "arrow>=1.3.0",
+    "click>=8.1.7",
+    "colorama",
+    "fastapi",
+    "pandas",
+    "path",
+    "psutil",
+    "pydash",
+    "python-multipart",
+    "rich",
+    "ruyaml",
+    "structlog",
+    "uvicorn",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
 
-[tool.poetry.scripts]
-spendit = 'spendit.cli:cli'
-
-[tool.poetry.dependencies]
-addict = "*"
-colorama = "*"
-dateparser = "*"
-duckdb = "*"
-fastapi = "*"
-pandas = "*"
-path = "*"
-psutil = "*"
-pydash = "*"
-python-multipart = "*"
-rich = "*"
-ruyaml = "*"
-structlog = "*"
-uvicorn = "*"
+[project.scripts]
+spendit = "spendit.cli:cli"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
+[tool.rye]
+managed = true
+dev-dependencies = []
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["spendit"]

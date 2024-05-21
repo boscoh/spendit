@@ -7,11 +7,11 @@ const store = transactionsStore()
 <template>
   <div class="d-inline">
     <button
-      class="btn btn-outline-primary"
+      class="btn btn-outline-secondary"
       type="button"
       data-bs-toggle="offcanvas"
-      data-bs-target="#offcanvasExample"
-      aria-controls="offcanvasExample"
+      data-bs-target="#autofill-panel"
+      aria-controls="autofill-panel"
     >
       Autofill
     </button>
@@ -20,13 +20,13 @@ const store = transactionsStore()
   <div
     class="offcanvas offcanvas-start"
     tabindex="-1"
-    id="offcanvasExample"
-    aria-labelledby="autofillPanel"
+    id="autofill-panel"
+    aria-labelledby="autofill-title"
   >
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="autofillPanel">Autofill panel</h5>
+      <h5 class="offcanvas-title" id="autofill-title">Autofill panel</h5>
       <div class="px-2"></div>
-      <button class="btn btn-outline-primary" @click="store.autofill">Recalculate</button>
+      <button class="btn btn-outline-secondary" @click="store.autofill">Recalculate</button>
       <button
         type="button"
         class="btn-close"

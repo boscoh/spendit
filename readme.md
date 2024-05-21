@@ -47,3 +47,28 @@ cd client-react && npm i && npm run dev
 - load file into db @done
 - plotly graph of data @done
 
+### config
+- `/etc/nginx/sites-enabled/fastapi`:
+    ```
+    server {
+        listen 80;
+        server_name ~^(.+)$;
+        location / {
+            proxy_pass http://0.0.0.0:9023;
+        }
+    
+    }
+    ```
+- `/etc/supervisor/conf.d/fastapi.conf`:
+   ```
+    [program:fastapi]
+    directory=/home/boscoh/spendit/spendit
+    command=/home/boscoh/spendit/.venv/bin/python3 cli.py run --port 9023
+    autostart=true
+    user=boscoh
+    autorestart=true
+    stopasgroup=true
+    killasgroup=true
+    stderr_logfile=/var/log/spendit/errors
+    stdout_logfile=/var/log/spendit/logs
+    ```

@@ -5,17 +5,27 @@ import pandas
 from path import Path
 from pydash import py_
 
-from spendit.db import SqliteDb
-from spendit.fs import load_yaml
+from .db import SqliteDb
+from .fs import load_yaml
 
 db: Optional[SqliteDb] = None
 data_dir = None
-db_name = "new_data.sqlite3"
+db_name = "data.sqlite3"
 
-def init(config):
-    global data_dir
+
+def init(config=None):
+    """
+    :param config: dict - optional {"data_dir": str}
+    """
     global db
-    data_dir = config["data_dir"]
+    global data_dir
+
+    if config is None:
+        config = {}
+    if "data_dir" in config:
+        data_dir = config["data_dir"]
+    else:
+        data_dir = Path(__file__).parent / "data"
 
     db = SqliteDb(data_dir / db_name)
 
@@ -40,7 +50,7 @@ def init(config):
     db.commit()
 
 
-def get_reports():
+def get_report_names():
     df = db.get_df(table="reports")
     return df.name.tolist()
 
@@ -148,18 +158,16 @@ def autofill(report):
 
 
 def inject_csv(csv):
-    report = py_.snake_case(Path(csv).stem)
-
-    if report in get_reports():
+    name = py_.snake_case(Path(csv).stem)
+    if name in get_report_names():
         return
-
     categories = load_yaml(data_dir / "categories.yaml")
     report_id = db.insert(
-        {
-            "name": report,
+        table="reports",
+        entry={
+            "name": name,
             "json_categories": json.dumps(categories),
         },
-        table="reports",
     )
 
     df = pandas.read_csv(csv)

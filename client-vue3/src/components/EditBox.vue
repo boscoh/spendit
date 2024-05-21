@@ -2,6 +2,9 @@
 import { nextTick, ref } from 'vue'
 import { transactionsStore } from '../stores/transactionsStore.js'
 
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faPen } from '@fortawesome/free-solid-svg-icons'
+
 const store = transactionsStore()
 const props = defineProps(['text', 'handleText'])
 const inputText = ref('')
@@ -51,6 +54,7 @@ function handleEscape(e) {
     </template>
     <template v-else>
       <div :style="style" class="form-control" @click="startEdit">{{ props.text }}</div>
+      <FontAwesomeIcon class="text-black-50" :icon="faPen"></FontAwesomeIcon>
     </template>
   </div>
 </template>

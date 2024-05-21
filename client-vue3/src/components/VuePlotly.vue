@@ -1,87 +1,47 @@
 <template>
-  <div ref="container" :id="plotlyId"></div>
+  <div ref="divRef" :id="plotlyId"></div>
 </template>
 
 <script setup>
-import { v4 as uuidv4 } from 'uuid'
 import Plotly from 'plotly.js-dist'
 import { onBeforeUnmount, ref, watchEffect } from 'vue'
+import { eventNames, functionNames } from './plotlyConstants.js'
+import _ from 'lodash'
 
 const props = defineProps(['data', 'layout', 'config'])
-const emit = defineEmits([
-  'plotly_click',
-  'plotly_hover',
-  'plotly_unhover',
-  'plotly_selecting',
-  'plotly_selected',
-  'plotly_restyle',
-  'plotly_relayout',
-  'plotly_autosize',
-  'plotly_deselect',
-  'plotly_doubleclick',
-  'plotly_redraw',
-  'plotly_animated',
-  'plotly_afterplot'
-])
-let plotlyId = ref(`plotly-${uuidv4()}`)
-let container = ref(null)
-let isRendered = false
-let resizeObserver = null
+const emit = defineEmits(eventNames)
 
-function debounce(func, timeout = 300) {
-  let timer
-  return (...args) => {
-    clearTimeout(timer)
-    timer = setTimeout(() => func(...args), timeout)
-  }
+const plotlyId = ref(_.uniqueId('plotly-'))
+const divRef = ref(null)
+const resizeObserver = new ResizeObserver(_.debounce(resize, 50))
+const fnByName = _.mapValues(functionNames, (functionName) => {
+  const plotlyFn = Plotly[functionName]
+  return (...args) => plotlyFn(divRef.value, ...args)
+})
+
+let isCreated = false
+
+function resize() {
+  Plotly.Plots.resize(divRef.value)
 }
 
-const resize = debounce(() => Plotly.Plots.resize(container.value), 50)
-
-function update() {
-  Plotly.react(plotlyId.value, props.data, props.layout, props.config)
-}
-
-async function render() {
-  const div = await Plotly.newPlot(plotlyId.value, props.data, props.layout, props.config)
-  const events = [
-    'plotly_click',
-    'plotly_hover',
-    'plotly_unhover',
-    'plotly_selecting',
-    'plotly_selected',
-    'plotly_restyle',
-    'plotly_relayout',
-    'plotly_autosize',
-    'plotly_deselect',
-    'plotly_doubleclick',
-    'plotly_redraw',
-    'plotly_animated',
-    'plotly_afterplot'
-  ]
-  events.forEach((name) => div.on(name, (...args) => emit(name, ...args)))
-  resizeObserver = new ResizeObserver(resize)
-  resizeObserver.observe(div)
-}
-
-watchEffect(() => {
-  if (container.value) {
-    if (!isRendered) {
-      render()
-      isRendered = true
-    } else {
-      update()
-    }
+watchEffect(async () => {
+  if (isCreated) {
+    Plotly.react(plotlyId.value, props.data, props.layout, props.config)
+  } else if (divRef.value) {
+    const div = await Plotly.newPlot(plotlyId.value, props.data, props.layout, props.config)
+    resizeObserver.observe(div)
+    eventNames.forEach((eventName) => {
+      div.on(eventName, (...args) => emit(eventName, ...args))
+    })
+    isCreated = true
   }
 })
 
 onBeforeUnmount(() => {
   resizeObserver.disconnect()
+  Plotly.purge(divRef.value)
 })
 
-function downloadImage(imageProps = { format: 'png', width: 800, height: 600, filename: 'plot' }) {
-  Plotly.downloadImage(container.value, imageProps)
-}
-
-defineExpose({ plotlyId, render, update, resize, downloadImage })
+defineExpose({ plotlyId, ...fnByName })
 </script>

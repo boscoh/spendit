@@ -1,7 +1,7 @@
 from path import Path
 
-from app import make_app, init_logging
-from fs import load_yaml
+from .app import make_app, init_logging
+from .fs import load_yaml
 
 # Instantiates fast-api app with config from app.yaml
 init_logging()

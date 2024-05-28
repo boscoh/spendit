@@ -16,7 +16,7 @@ export const transactionsStore = defineStore('transactions', () => {
   async function loadReport(newTable) {
     table.value = newTable
 
-    let reportResponses = await remote.get_report_row(newTable)
+    let reportResponses = await remote.get_report_dict(newTable)
     const report = reportResponses.result
     categories.value = JSON.parse(report.json_categories)
     offsetDays.value = report.offset_days

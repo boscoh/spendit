@@ -20,6 +20,11 @@ dependencies = [
     "ruyaml",
     "structlog",
     "uvicorn",
+    "pypika>=0.48.9",
+    "ruff>=0.4.4",
+    "ruff-lsp>=0.0.53",
+    "pytest>=8.2.1",
+    "sqladaptor>=0.2",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

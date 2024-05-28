@@ -1,20 +1,23 @@
 # spendit
 
-Skeleton data webapp that runs both locally and remotely, with  dev setup options.
+Skeleton data webapp that runs both locally and remotely, with dev setup options.
 
+- simple rpc bridge between server and client
+- a webserver that can run locally via cli, or deployed as production
+- transparently convert csv to a sqlite db
 - equivalent Vue3, React and Svelte clients
-- rpc bridge to fastapi python server
-- convenient clie with dev modes for server and client, and port mappings
+- clients cover a useful subset of reusable features 
 
 ## CLIENT
 
-For all clients, the following has been implemented:
+The client implements features that covers the functionality of most simple apps:
+
 - dynamic routes
 - global store
 - modals
-- fully interactive graph
-- crud and forms to db
-- bootstrap styles for cross-framework designs
+- interactive graph with page
+- form data to db
+- bootstrap styles 
 
 ### Client
 
@@ -37,9 +40,10 @@ cd client-react && npm i && npm run dev
 ### todo
 - merge datasets
 - names: spendit vs. sortable
-- generate fake data
 - update api for svelte/react
 @done
+- generate fake data
+- editable categories
 - offsetDays/categories save in db per table @done
 - redo database 
 - change main name for python import @done

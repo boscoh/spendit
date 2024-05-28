@@ -22,7 +22,7 @@ export async function loadReport(name) {
 		headers.set(result.columns);
 		rows.set(result.data);
 	}
-	response = await remote.get_report_row(name);
+	response = await remote.get_report_dict(name);
 	if ('result' in response) {
 		categories.set(JSON.parse(response.result.json_categories));
 		offset.set(response.result.offset_days);

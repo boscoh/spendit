@@ -4,11 +4,11 @@ from typing import Optional
 import pandas
 from path import Path
 from pydash import py_
+from sqladaptor import SqliteAdaptor
 
-from .db import SqliteDb
 from .fs import load_yaml
 
-db: Optional[SqliteDb] = None
+db: Optional[SqliteAdaptor] = None
 data_dir = None
 db_name = "data.sqlite3"
 
@@ -27,74 +27,65 @@ def init(config=None):
     else:
         data_dir = Path(__file__).parent / "data"
 
-    db = SqliteDb(data_dir / db_name)
-
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS reports (
-            report_id INTEGER PRIMARY KEY, 
-            name text NOT NULL, 
-            offset_days INT,
-            json_categories TEXT
-        );
-    """)
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS transactions (
-            transaction_id INTEGER PRIMARY KEY, 
-            report_id INTEGER,
-            description text, 
-            date text,
-            amount FLOAT,
-            category text
-        );
-    """)
-    db.commit()
+    db = SqliteAdaptor(data_dir / db_name)
+    db.create_table(
+        "reports",
+        {
+            "type": "object",
+            "properties": {
+                "report_id": {"type": "integer"},
+                "name": {"type": "string"},
+                "offset_days": {"type": "integer"},
+                "json_categories": {"type": "string"},
+            },
+            "required": ["report_id"],
+        },
+    )
+    db.create_table(
+        "transactions",
+        {
+            "type": "object",
+            "properties": {
+                "transaction_id": {"type": "integer"},
+                "report_id": {"type": "integer"},
+                "description": {"type": "string"},
+                "date": {"type": "string"},
+                "amount": {"type": "number"},
+                "category": {"type": "string"},
+            },
+            "required": ["transaction_id"],
+        },
+    )
 
 
 def get_report_names():
-    df = db.get_df(table="reports")
+    df = db.get_df("reports")
     return df.name.tolist()
 
 
-def get_report_row(report):
-    sql = "select * from reports where name = ?"
-    params = [report]
-    df = db.execute_to_df(sql, params=params)
-    return df.iloc[0].to_dict()
+def get_report_dict(report):
+    return db.get_one_dict("reports", {"name": report})
 
 
 def update_report(report, val_by_col):
-    report_row = get_report_row(report)
-    params = []
-    sql = "UPDATE reports "
-    for i_val, (col, val) in enumerate(val_by_col.items()):
-        sql += "SET " if i_val == 0 else "AND "
-        sql += f"{col} = ? "
-        params.append(str(val))
-    sql += "WHERE report_id = ?"
-    params.append(str(report_row["report_id"]))
-    db.execute(sql, params)
-    db.commit()
+    db.update("reports", {"name": report}, val_by_col)
 
 
 def delete_report(report):
-    params = [str(get_report_id(report))]
-    sql = "DELETE FROM transactions WHERE report_id = ?"
-    db.execute(sql, params)
-    sql = "DELETE FROM reports WHERE report_id = ?"
-    db.execute(sql, params)
-    db.commit()
+    db.delete("transactions", {"report_id": get_report_id(report)})
+    db.delete("reports", {"report_id": get_report_id(report)})
 
 
 def rename_report(report, new_report):
-    update_report(report, {"name": new_report})
+    db.update("reports", {"name": report}, {"name": new_report})
 
 
 def get_report_id(report):
-    return get_report_row(report)["report_id"]
+    return get_report_dict(report)["report_id"]
 
 
 def get_categories(report):
-    report_row = get_report_row(report)
+    report_row = get_report_dict(report)
     return json.loads(report_row["json_categories"])
 
 
@@ -103,9 +94,7 @@ def update_categories(categories, report):
 
 
 def get_df(report):
-    sql = "select * from transactions where report_id = ?"
-    params = [str(get_report_id(report))]
-    df = db.execute_to_df(sql, params=params)
+    df = db.get_df("transactions", {"report_id": str(get_report_id(report))})
     df.rename(columns={"transaction_id": "id"}, inplace=True)
     df.sort_values(by="date", inplace=True)
     return df[["id", "date", "description", "amount", "category"]]
@@ -120,18 +109,15 @@ def get_csv(report):
     return get_df(report).to_csv(index=False)
 
 
-def update_transaction(report, row_id, val_by_col):
-    params = []
-    sql = "UPDATE transactions "
-    for i_val, (col, val) in enumerate(val_by_col.items()):
-        sql += "SET " if i_val == 0 else "AND "
-        sql += f"{col} = ? "
-        params.append(str(val))
-    sql += "WHERE report_id = ? AND transaction_id = ? "
-    params.append(str(get_report_id(report)))
-    params.append(str(row_id))
-    db.execute(sql, params)
-    db.commit()
+def update_transaction(report, transaction_id, vals):
+    db.update(
+        "transactions",
+        {
+            "report_id": get_report_id(report),
+            "transaction_id": transaction_id,
+        },
+        vals,
+    )
 
 
 def autofill(report):
@@ -163,20 +149,16 @@ def inject_csv(csv):
         return
     categories = load_yaml(data_dir / "categories.yaml")
     report_id = db.insert(
-        table="reports",
-        entry={
-            "name": name,
-            "json_categories": json.dumps(categories),
-        },
+        "reports",
+        {"name": name, "json_categories": json.dumps(categories)},
     )
-
     df = pandas.read_csv(csv)
     df.rename(columns={"debit_amount": "amount"}, inplace=True)
     if "category" not in df:
         df["category"] = None
     df = df[["date", "description", "amount", "category"]]
     df["report_id"] = report_id
-    db.set_from_df(df, "transactions", if_exists="append")
+    db.set_from_df("transactions", df, if_exists="append")
 
 
 def upload_csv(fname):

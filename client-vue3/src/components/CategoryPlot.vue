@@ -1,6 +1,6 @@
 <script setup>
 import { transactionsStore } from '../stores/transactionsStore.js'
-import VuePlotly from './VuePlotly.vue'
+import VuePlotly from 'vue3-plotly-ts'
 import { ref, watch } from 'vue'
 import _ from 'lodash'
 

@@ -19,7 +19,7 @@ export default store
 export async function loadReport(table: string) {
     const transactions = { table } as Partial<ITransactions>
 
-    const reportResponse = await remote.get_report_row(table)
+    const reportResponse = await remote.get_report_dict(table)
     if ('result' in reportResponse) {
         transactions.categories = JSON.parse(
             reportResponse.result.json_categories

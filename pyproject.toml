@@ -1,6 +1,6 @@
 [project]
 name = "spendit"
-version = "0.1.0"
+version = "0.0.2"
 description = "Data viz cli/web app"
 authors = [
     { name = "Bosco Ho", email = "apposite@gmail.com" }
@@ -25,12 +25,14 @@ dependencies = [
     "ruff-lsp>=0.0.53",
     "pytest>=8.2.1",
     "sqladaptor>=0.2",
+    "semver>=3.0.2",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
 
 [project.scripts]
 spendit = "spendit.cli:cli"
+bumpver = "bumpver:main"
 
 [build-system]
 requires = ["hatchling"]

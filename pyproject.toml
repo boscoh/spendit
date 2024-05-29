@@ -1,6 +1,6 @@
 [project]
 name = "spendit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Data viz cli/web app"
 authors = [
     { name = "Bosco Ho", email = "apposite@gmail.com" }

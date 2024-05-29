@@ -59,12 +59,12 @@ def init(config=None):
 
 
 def get_report_names():
-    df = db.get_df("reports")
+    df = db.read_df("reports")
     return df.name.tolist()
 
 
 def get_report_dict(report):
-    return db.get_one_dict("reports", {"name": report})
+    return db.read_one_dict("reports", {"name": report})
 
 
 def update_report(report, val_by_col):
@@ -94,7 +94,7 @@ def update_categories(categories, report):
 
 
 def get_df(report):
-    df = db.get_df("transactions", {"report_id": str(get_report_id(report))})
+    df = db.read_df("transactions", {"report_id": str(get_report_id(report))})
     df.rename(columns={"transaction_id": "id"}, inplace=True)
     df.sort_values(by="date", inplace=True)
     return df[["id", "date", "description", "amount", "category"]]
